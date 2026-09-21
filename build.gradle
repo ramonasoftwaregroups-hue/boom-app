@@ -16,9 +16,7 @@
 
 import groovy.xml.MarkupBuilder
 
-plugins {
-    id 'com.android.application'
-}
+apply plugin: 'com.android.application'
 
 def twaManifest = [
     applicationId: 'ir.picassooads.boom.twa',
