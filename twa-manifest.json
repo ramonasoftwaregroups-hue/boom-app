@@ -1,0 +1,76 @@
+{
+  "packageId": "ir.picassooads.boom.twa",
+  "host": "boom.picassooads.ir",
+  "name": "Boom Picasso",
+  "launcherName": "Boom",
+  "display": "standalone",
+  "themeColor": "#007E93",
+  "themeColorDark": "#000000",
+  "navigationColor": "#000000",
+  "navigationColorDark": "#000000",
+  "navigationDividerColor": "#000000",
+  "navigationDividerColorDark": "#000000",
+  "backgroundColor": "#FFFFFF",
+  "enableNotifications": true,
+  "startUrl": "/panel/pwa/splash.html?source=pwa",
+  "iconUrl": "https://boom.picassooads.ir/assets/icons/icon-512x512.png",
+  "maskableIconUrl": "https://boom.picassooads.ir/assets/icons/icon-512x512-maskable-v2.png",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "C:\\Users\\morte\\boom-app\\android.keystore",
+    "alias": "android"
+  },
+  "appVersionName": "1",
+  "appVersionCode": 1,
+  "shortcuts": [
+    {
+      "name": "داشبورد",
+      "shortName": "داشبورد",
+      "url": "https://boom.picassooads.ir/panel/user/dashboard.php",
+      "chosenIconUrl": "https://boom.picassooads.ir/assets/icons/shortcut-dashboard-96x96.png"
+    },
+    {
+      "name": "رزرو جدید",
+      "shortName": "رزرو",
+      "url": "https://boom.picassooads.ir/panel/user/select_space.php",
+      "chosenIconUrl": "https://boom.picassooads.ir/assets/icons/shortcut-reserve-96x96.png"
+    },
+    {
+      "name": "پروفایل",
+      "shortName": "پروفایل",
+      "url": "https://boom.picassooads.ir/panel/user/profile.php",
+      "chosenIconUrl": "https://boom.picassooads.ir/assets/icons/shortcut-profile-96x96.png"
+    }
+  ],
+  "generatorApp": "bubblewrap-cli",
+  "webManifestUrl": "https://boom.picassooads.ir/panel/pwa/manifest.json",
+  "fallbackType": "customtabs",
+  "features": {
+    "playBilling": {
+      "enabled": true
+    },
+    "locationDelegation": {
+      "enabled": true
+    }
+  },
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "fullScopeUrl": "https://boom.picassooads.ir/panel/",
+  "minSdkVersion": 21,
+  "orientation": "portrait",
+  "fingerprints": [],
+  "additionalTrustedOrigins": [],
+  "retainedBundles": [],
+  "protocolHandlers": [],
+  "fileHandlers": [],
+  "launchHandlerClientMode": "",
+  "displayOverride": [
+    "standalone",
+    "minimal-ui"
+  ],
+  "appVersion": "1"
+}
