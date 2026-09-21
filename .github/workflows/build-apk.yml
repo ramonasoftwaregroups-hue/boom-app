@@ -19,20 +19,10 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Update Android cmdline-tools
-        run: |
-          cd /tmp
-          wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
-          unzip -q commandlinetools-linux-11076708_latest.zip
-          rm -rf $ANDROID_HOME/cmdline-tools/latest
-          mkdir -p $ANDROID_HOME/cmdline-tools/latest
-          mv cmdline-tools/bin $ANDROID_HOME/cmdline-tools/latest/
-          mv cmdline-tools/lib $ANDROID_HOME/cmdline-tools/latest/
-
-      - name: Accept licenses and install SDK packages
-        run: |
-          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
-          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools platforms;android-34 build-tools;34.0.0'
 
       - name: Build APK
         run: |
