@@ -93,6 +93,8 @@ android {
     buildTypes {
         release {
             minifyEnabled true
+            // *** این خط اضافه شد تا R8 کدهای TWA را پاک نکند ***
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
         }
     }
@@ -147,11 +149,9 @@ preBuild.dependsOn(generateShorcutsFile)
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
-    // *** این خط حیاتی است ***
     implementation 'androidx.browser:browser:1.8.0'
 
     implementation 'com.google.androidbrowserhelper:locationdelegation:1.1.2'
     implementation 'com.google.androidbrowserhelper:billing:1.2.0'
-    // *** به نسخه 2.6.2 برگردانده شد ***
     implementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.6.2'
 }
