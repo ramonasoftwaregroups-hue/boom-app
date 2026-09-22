@@ -31,6 +31,11 @@ jobs:
           file app/android.keystore
           sha256sum app/android.keystore
 
+      - name: Print Dependency Tree
+        run: |
+          chmod +x gradlew
+          ./gradlew :app:dependencies --configuration releaseRuntimeClasspath
+
       - name: Build Signed APK
         env:
           KEYSTORE_FILE: ${{ github.workspace }}/app/android.keystore
