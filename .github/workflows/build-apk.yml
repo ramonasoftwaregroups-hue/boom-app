@@ -26,16 +26,18 @@ jobs:
 
       - name: Decode Keystore
         run: |
-          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d -i > app/android.keystore
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | tr -d '\r\n' | base64 -d > app/android.keystore
+          ls -la app/android.keystore
 
       - name: Build Signed APK
+        env:
+          KEYSTORE_FILE: ${{ github.workspace }}/app/android.keystore
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
           chmod +x gradlew
-          ./gradlew assembleRelease --no-daemon \
-            -Pandroid.injected.signing.store.file=$PWD/app/android.keystore \
-            -Pandroid.injected.signing.store.password=${{ secrets.KEYSTORE_PASSWORD }} \
-            -Pandroid.injected.signing.key.alias=${{ secrets.KEY_ALIAS }} \
-            -Pandroid.injected.signing.key.password=${{ secrets.KEY_PASSWORD }}
+          ./gradlew clean assembleRelease --no-daemon
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
