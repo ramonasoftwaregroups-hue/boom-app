@@ -1,84 +1,17 @@
-import groovy.xml.MarkupBuilder
-
 apply plugin: 'com.android.application'
-
-// *** قفل کردن نسخه‌ها قبل از dependencies ***
-configurations.all {
-    resolutionStrategy {
-        force 'androidx.browser:browser:1.8.0'
-        force 'androidx.core:core:1.13.1'
-        force 'androidx.core:core-ktx:1.13.1'
-    }
-}
-
-def twaManifest = [
-    applicationId: 'ir.picassooads.boom.twa',
-    hostName: 'boom.picassooads.ir',
-    launchUrl: '/panel/pwa/splash.html?source=pwa',
-    name: 'Boom Picasso',
-    launcherName: 'Boom',
-    themeColor: '#007E93',
-    themeColorDark: '#000000',
-    navigationColor: '#000000',
-    navigationColorDark: '#000000',
-    navigationDividerColor: '#000000',
-    navigationDividerColorDark: '#000000',
-    backgroundColor: '#FFFFFF',
-    enableNotifications: true,
-    shortcuts: [
-        [name:'داشبورد', short_name:'داشبورد', url:'https://boom.picassooads.ir/panel/user/dashboard.php', icon:'shortcut_0'],
-        [name:'رزرو جدید', short_name:'رزرو', url:'https://boom.picassooads.ir/panel/user/select_space.php', icon:'shortcut_1'],
-        [name:'پروفایل', short_name:'پروفایل', url:'https://boom.picassooads.ir/panel/user/profile.php', icon:'shortcut_2']
-    ],
-    splashScreenFadeOutDuration: 300,
-    generatorApp: 'bubblewrap-cli',
-    fallbackType: 'customtabs',
-    enableSiteSettingsShortcut: 'true',
-    orientation: 'portrait',
-]
 
 android {
     compileSdkVersion 34
     buildToolsVersion "34.0.0"
     namespace "ir.picassooads.boom.twa"
+
     defaultConfig {
         applicationId "ir.picassooads.boom.twa"
         minSdkVersion 23
         targetSdkVersion 34
-        versionCode 2
-        versionName "2"
-
-        resValue "string", "appName", twaManifest.name
-        resValue "string", "launcherName", twaManifest.launcherName
-
-        def launchUrl = "https://" + twaManifest.hostName + twaManifest.launchUrl
-        resValue "string", "launchUrl", launchUrl
-
-        resValue "string", "webManifestUrl", 'https://boom.picassooads.ir/panel/pwa/manifest.json'
-        resValue "string", "fullScopeUrl", 'https://boom.picassooads.ir/panel/'
-        resValue "string", "hostName", twaManifest.hostName
-
-        resValue "color", "colorPrimary", twaManifest.themeColor
-        resValue "color", "colorPrimaryDark", twaManifest.themeColorDark
-        resValue "color", "navigationColor", twaManifest.navigationColor
-        resValue "color", "navigationColorDark", twaManifest.navigationColorDark
-        resValue "color", "navigationDividerColor", twaManifest.navigationDividerColor
-        resValue "color", "navigationDividerColorDark", twaManifest.navigationDividerColorDark
-        resValue "color", "backgroundColor", twaManifest.backgroundColor
-
-        resValue "string", "providerAuthority", twaManifest.applicationId + '.fileprovider'
-        resValue "bool", "enableNotification", twaManifest.enableNotifications.toString()
-
-        twaManifest.shortcuts.eachWithIndex { shortcut, index ->
-            resValue "string", "shortcut_name_$index", "$shortcut.name"
-            resValue "string", "shortcut_short_name_$index", "$shortcut.short_name"
-        }
-
-        resValue "integer", "splashScreenFadeOutDuration", twaManifest.splashScreenFadeOutDuration.toString()
-        resValue "string", "generatorApp", twaManifest.generatorApp
-        resValue "string", "fallbackType", twaManifest.fallbackType
-        resValue "bool", "enableSiteSettingsShortcut", twaManifest.enableSiteSettingsShortcut
-        resValue "string", "orientation", twaManifest.orientation
+        versionCode 3
+        versionName "3"
+        resValue "string", "appName", "Boom Picasso"
     }
 
     signingConfigs {
@@ -93,8 +26,6 @@ android {
     buildTypes {
         release {
             minifyEnabled false
-            // *** این خط اضافه شد تا R8 کدهای TWA را پاک نکند ***
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
         }
     }
@@ -109,49 +40,6 @@ android {
     }
 }
 
-task generateShorcutsFile {
-    assert twaManifest.shortcuts.size() < 5, "You can have at most 4 shortcuts."
-    twaManifest.shortcuts.eachWithIndex { s, i ->
-        assert s.name != null, 'Missing `name` in shortcut #' + i
-        assert s.short_name != null, 'Missing `short_name` in shortcut #' + i
-        assert s.url != null, 'Missing `icon` in shortcut #' + i
-        assert s.icon != null, 'Missing `url` in shortcut #' + i
-    }
-
-    def shortcutsFile = new File("$projectDir/src/main/res/xml", "shortcuts.xml")
-
-    def xmlWriter = new StringWriter()
-    def xmlMarkup = new MarkupBuilder(new IndentPrinter(xmlWriter, "    ", true))
-
-    xmlMarkup
-        .'shortcuts'('xmlns:android': 'http://schemas.android.com/apk/res/android') {
-            twaManifest.shortcuts.eachWithIndex { s, i ->
-                'shortcut'(
-                        'android:shortcutId': 'shortcut' + i,
-                        'android:enabled': 'true',
-                        'android:icon': '@drawable/' + s.icon,
-                        'android:shortcutShortLabel': '@string/shortcut_short_name_' + i,
-                        'android:shortcutLongLabel': '@string/shortcut_name_' + i) {
-                    'intent'(
-                            'android:action': 'android.intent.action.MAIN',
-                            'android:targetPackage': twaManifest.applicationId,
-                            'android:targetClass': twaManifest.applicationId + '.LauncherActivity',
-                            'android:data': s.url)
-                    'categories'('android:name': 'android.intent.category.LAUNCHER')
-                }
-            }
-        }
-    shortcutsFile.text = xmlWriter.toString() + '\n'
-}
-
-preBuild.dependsOn(generateShorcutsFile)
-
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-
-    implementation 'androidx.browser:browser:1.8.0'
-
-    implementation 'com.google.androidbrowserhelper:locationdelegation:1.1.2'
-    implementation 'com.google.androidbrowserhelper:billing:1.2.0'
-    implementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.6.2'
 }
