@@ -2,10 +2,12 @@ import groovy.xml.MarkupBuilder
 
 apply plugin: 'com.android.application'
 
-// *** این بلوک باید قبل از dependencies باشد ***
+// *** قفل کردن نسخه‌ها قبل از dependencies ***
 configurations.all {
     resolutionStrategy {
         force 'androidx.browser:browser:1.8.0'
+        force 'androidx.core:core:1.13.1'
+        force 'androidx.core:core-ktx:1.13.1'
     }
 }
 
@@ -43,7 +45,6 @@ android {
         applicationId "ir.picassooads.boom.twa"
         minSdkVersion 23
         targetSdkVersion 34
-        // *** تغییر داده شد تا مطمئن شویم APK جدید نصب می‌شود ***
         versionCode 2
         versionName "2"
 
@@ -146,10 +147,11 @@ preBuild.dependsOn(generateShorcutsFile)
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
-    // *** خط حیاتی: این خط باید دقیقاً اینجا باشد ***
+    // *** این خط حیاتی است ***
     implementation 'androidx.browser:browser:1.8.0'
 
     implementation 'com.google.androidbrowserhelper:locationdelegation:1.1.2'
     implementation 'com.google.androidbrowserhelper:billing:1.2.0'
-    implementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.7.0'
+    // *** به نسخه 2.6.2 برگردانده شد ***
+    implementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.6.2'
 }
