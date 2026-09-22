@@ -38,6 +38,26 @@ android {
     lintOptions {
         checkReleaseBuilds false
     }
+
+    // *** تغییر نام فایل خروجی APK ***
+    applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            def newApkName = "BoomPicasso-${variant.versionName}.apk"
+            outputFileName = newApkName
+        }
+    }
+}
+
+// *** تغییر نام فایل خروجی AAB ***
+tasks.matching { it.name == "bundleRelease" }.configureEach {
+    doLast {
+        def bundleDir = new File(project.buildDir, "outputs/bundle/release")
+        def oldFile = new File(bundleDir, "app-release.aab")
+        def newFile = new File(bundleDir, "BoomPicasso-${android.defaultConfig.versionName}.aab")
+        if (oldFile.exists()) {
+            oldFile.renameTo(newFile)
+        }
+    }
 }
 
 dependencies {
