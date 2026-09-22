@@ -26,8 +26,10 @@ jobs:
 
       - name: Decode Keystore
         run: |
-          echo "${{ secrets.KEYSTORE_BASE64 }}" | tr -d '\r\n' | base64 -d > app/android.keystore
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > app/android.keystore
           ls -la app/android.keystore
+          file app/android.keystore
+          sha256sum app/android.keystore
 
       - name: Build Signed APK
         env:
