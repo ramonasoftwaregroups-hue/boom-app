@@ -143,6 +143,9 @@ configurations.all {
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
+    // *** خط اضافه شده برای رفع مشکل کرش ***
+    implementation 'androidx.browser:browser:1.8.0'
+    
     implementation 'com.google.androidbrowserhelper:locationdelegation:1.1.2'
     implementation 'com.google.androidbrowserhelper:billing:1.2.0'
     implementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.6.2'
