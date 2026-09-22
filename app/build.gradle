@@ -2,6 +2,13 @@ import groovy.xml.MarkupBuilder
 
 apply plugin: 'com.android.application'
 
+// *** این بلوک باید قبل از dependencies باشد ***
+configurations.all {
+    resolutionStrategy {
+        force 'androidx.browser:browser:1.8.0'
+    }
+}
+
 def twaManifest = [
     applicationId: 'ir.picassooads.boom.twa',
     hostName: 'boom.picassooads.ir',
@@ -36,8 +43,9 @@ android {
         applicationId "ir.picassooads.boom.twa"
         minSdkVersion 23
         targetSdkVersion 34
-        versionCode 1
-        versionName "1"
+        // *** تغییر داده شد تا مطمئن شویم APK جدید نصب می‌شود ***
+        versionCode 2
+        versionName "2"
 
         resValue "string", "appName", twaManifest.name
         resValue "string", "launcherName", twaManifest.launcherName
@@ -135,18 +143,13 @@ task generateShorcutsFile {
 
 preBuild.dependsOn(generateShorcutsFile)
 
-configurations.all {
-    resolutionStrategy {
-        force 'androidx.browser:browser:1.8.0'
-    }
-}
-
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    // *** خط اضافه شده برای رفع مشکل کرش ***
+
+    // *** خط حیاتی: این خط باید دقیقاً اینجا باشد ***
     implementation 'androidx.browser:browser:1.8.0'
-    
+
     implementation 'com.google.androidbrowserhelper:locationdelegation:1.1.2'
     implementation 'com.google.androidbrowserhelper:billing:1.2.0'
-    implementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.6.2'
+    implementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.7.0'
 }
