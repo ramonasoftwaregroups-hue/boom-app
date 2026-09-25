@@ -15,40 +15,36 @@
      limitations under the License.
 -->
 <resources>
-  
 
-  <!--
-    The "fullscreen" and "fullscreen-sticky" TWA manifest values correspond to "immersive" and "sticky-immersive"
-    AndroidManifest values.
-  -->
-  
+    <!-- ═══════════ نام اپ ═══════════ -->
+    <!-- این خیلی مهمه - بدون این، اپ نصب نمی‌شه -->
+    <string name="appName" translatable="false">Boom Picasso</string>
+
+    <!-- ═══════════ Display Override (TWA) ═══════════ -->
+    <!--
+      The "fullscreen" and "fullscreen-sticky" TWA manifest values correspond
+      to "immersive" and "sticky-immersive" AndroidManifest values.
+    -->
     <string-array name="display_override">
-    
-      
         <item>standalone</item>
-      
-    
-      
         <item>minimal-ui</item>
-      
-    
     </string-array>
-  
 
-  <!--
-    This variable below expresses the relationship between the app and the site,
-    as documented in the TWA documentation at
-    https://developers.google.com/web/updates/2017/10/using-twa#set_up_digital_asset_links_in_an_android_app
-    and is injected into the AndroidManifest.xml
-  -->
-  <string name="assetStatements">
-    [{
-        \"relation\": [\"delegate_permission/common.handle_all_urls\"],
-        \"target\": {
-            \"namespace\": \"web\",
-            \"site\": \"https://boom.picassooads.ir\"
-        }
-    }]
-    
-  </string>  
+    <!-- ═══════════ Digital Asset Links (TWA) ═══════════ -->
+    <!--
+      This variable below expresses the relationship between the app and the site,
+      as documented in the TWA documentation at
+      https://developers.google.com/web/updates/2017/10/using-twa#set_up_digital_asset_links_in_an_android_app
+      and is injected into the AndroidManifest.xml
+    -->
+    <string name="assetStatements" translatable="false">
+        [{
+            \"relation\": [\"delegate_permission/common.handle_all_urls\"],
+            \"target\": {
+                \"namespace\": \"web\",
+                \"site\": \"https://boom.picassooads.ir\"
+            }
+        }]
+    </string>
+
 </resources>
