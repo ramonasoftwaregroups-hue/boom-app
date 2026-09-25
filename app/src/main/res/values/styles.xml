@@ -1,17 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- ═══════════ تم اصلی اپ ═══════════ -->
-    <style name="AppTheme" parent="@android:style/Theme.Material.Light.NoActionBar">
+    <!-- ═══════════════ تم اصلی اپ ═══════════════ -->
+    <!-- 
+      مهم: parent باید Theme.AppCompat باشه
+      چون MainActivity از AppCompatActivity ارث‌بری می‌کنه
+    -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:windowBackground">@color/backgroundColor</item>
         <item name="android:colorBackground">@color/backgroundColor</item>
         <item name="android:statusBarColor">@color/colorPrimary</item>
-        <item name="android:navigationBarColor">@color/colorPrimary</item>
+        <item name="android:navigationBarColor">@color/navigationColor</item>
         <item name="android:windowLightStatusBar">false</item>
-        <item name="android:windowLightNavigationBar">false</item>
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
-        <item name="android:windowTranslucentStatus">false</item>
-        <item name="android:windowTranslucentNavigation">false</item>
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
     </style>
 
 </resources>
