@@ -2,23 +2,16 @@
 <resources>
 
     <!-- ═══════════ تم اصلی اپ ═══════════ -->
-    <!-- پس‌زمینه سفید + بدون Title Bar -->
     <style name="AppTheme" parent="@android:style/Theme.Material.Light.NoActionBar">
         <item name="android:windowBackground">@color/backgroundColor</item>
         <item name="android:colorBackground">@color/backgroundColor</item>
-        <item name="android:statusBarColor">@color/backgroundColor</item>
-        <item name="android:navigationBarColor">@color/navigationColor</item>
-        <item name="android:windowLightStatusBar">true</item>
-        <item name="android:windowLightNavigationBar">true</item>
+        <item name="android:statusBarColor">@color/colorPrimary</item>
+        <item name="android:navigationBarColor">@color/colorPrimary</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">false</item>
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
-        <item name="android:colorPrimary">@color/colorPrimary</item>
-        <item name="android:colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="android:colorAccent">@color/colorAccent</item>
-    </style>
-
-    <!-- ═══════════ تم Splash ═══════════ -->
-    <style name="SplashTheme" parent="AppTheme">
-        <item name="android:windowBackground">@color/backgroundColor</item>
+        <item name="android:windowTranslucentStatus">false</item>
+        <item name="android:windowTranslucentNavigation">false</item>
     </style>
 
 </resources>
