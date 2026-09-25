@@ -113,6 +113,9 @@ public class MainActivity extends AppCompatActivity {
         // مخفی کردن عنوان (برای ظاهر native)
         builder.setShowTitle(false);
 
+        // ✅ مخفی شدن خودکار نوار آدرس هنگام اسکرول
+        builder.setUrlBarHidingEnabled(true);
+
         // انیمیشن‌ها
         builder.setStartAnimations(this, android.R.anim.fade_in, android.R.anim.fade_out);
         builder.setExitAnimations(this, android.R.anim.fade_in, android.R.anim.fade_out);
