@@ -1,23 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- ═══════════ اینترنت و شبکه ═══════════ -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <!-- ═══════════ موقعیت مکانی (Location) ═══════════ -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+    <!-- ═══════════ دوربین (Camera) ═══════════ -->
     <uses-permission android:name="android.permission.CAMERA" />
+
+    <!-- ═══════════ میکروفون (Microphone) ═══════════ -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+
+    <!-- ═══════════ گالری / فایل‌ها ═══════════ -->
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
                      android:maxSdkVersion="32" />
 
-    <uses-feature android:name="android.hardware.camera" android:required="false" />
-    <uses-feature android:name="android.hardware.microphone" android:required="false" />
-    <uses-feature android:name="android.hardware.location" android:required="false" />
+    <!-- ═══════════ قابلیت‌های اختیاری سخت‌افزار ═══════════ -->
+    <uses-feature android:name="android.hardware.camera"      android:required="false" />
+    <uses-feature android:name="android.hardware.microphone"  android:required="false" />
+    <uses-feature android:name="android.hardware.location"    android:required="false" />
+
+    <!-- ═══════════════════════════════════════════════════════════
+         Queries (الزامی برای Custom Tabs و Deep Linking)
+         ═══════════════════════════════════════════════════════════ -->
+    <queries>
+        <!-- Custom Tabs و مرورگرها -->
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="https" />
+        </intent>
+        <intent>
+            <action android:name="android.support.customtabs.action.CustomTabsService" />
+        </intent>
+    </queries>
 
     <application
         android:allowBackup="true"
