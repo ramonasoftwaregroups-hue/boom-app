@@ -21,7 +21,7 @@
     "alias": "android"
   },
   "appVersionName": "1",
-  "appVersionCode": 1,
+  "appVersionCode": 2,
   "shortcuts": [
     {
       "name": "داشبورد",
@@ -47,7 +47,7 @@
   "fallbackType": "customtabs",
   "features": {
     "playBilling": {
-      "enabled": true
+      "enabled": false
     },
     "locationDelegation": {
       "enabled": true
@@ -60,7 +60,7 @@
   "isChromeOSOnly": false,
   "isMetaQuest": false,
   "fullScopeUrl": "https://boom.picassooads.ir/panel/",
-  "minSdkVersion": 21,
+  "minSdkVersion": 24,
   "orientation": "portrait",
   "fingerprints": [],
   "additionalTrustedOrigins": [],
