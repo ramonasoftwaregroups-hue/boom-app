@@ -1,179 +1,200 @@
 package ir.picassooads.boom.twa;
 
-import android.content.ActivityNotFoundException;
-import android.content.ComponentName;
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.KeyEvent;
+import android.webkit.JavascriptInterface;
+import android.webkit.WebChromeClient;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.browser.customtabs.CustomTabsClient;
 import androidx.browser.customtabs.CustomTabsIntent;
-import androidx.browser.customtabs.CustomTabsServiceConnection;
-import androidx.browser.customtabs.CustomTabsSession;
 import androidx.core.content.ContextCompat;
 
 public class MainActivity extends AppCompatActivity {
 
-    // ═══════════════════════════════════════════════════════════
-    // Constants
-    // ═══════════════════════════════════════════════════════════
-    private static final String APP_URL = "https://boom.picassooads.ir/panel/pwa/splash.html?source=pwa";
+    private WebView webView;
+    private static final String BASE_URL = "https://boom.picassooads.ir/panel/pwa/splash.html?source=pwa";
     private static final String CHROME_PACKAGE = "com.android.chrome";
-    private static final String CHROME_BETA_PACKAGE = "com.chrome.beta";
-    private static final String CHROME_DEV_PACKAGE = "com.chrome.dev";
+    private static final String APP_SCHEME = "boomapp";
 
-    // ═══════════════════════════════════════════════════════════
-    // Custom Tabs State
-    // ═══════════════════════════════════════════════════════════
-    private CustomTabsClient customTabsClient;
-    private CustomTabsSession customTabsSession;
-    private CustomTabsServiceConnection connection;
-    private boolean urlOpened = false;
-
+    @SuppressLint({"SetJavaScriptEnabled", "AddJavascriptInterface"})
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
 
-        // رنگ نوار وضعیت
         try {
-            getWindow().setStatusBarColor(
-                ContextCompat.getColor(this, R.color.colorPrimary)
-            );
+            getWindow().setStatusBarColor(ContextCompat.getColor(this, R.color.colorPrimary));
         } catch (Exception ignored) {}
 
-        // اگه اپ توی Back Stack برگشته بود، دوباره باز کن
-        if (savedInstanceState != null && !urlOpened) {
-            openCustomTab();
-        } else {
-            connectAndOpen();
+        webView = findViewById(R.id.webview);
+        setupWebView();
+
+        // اگه با deep link باز شد
+        handleIntent(getIntent());
+
+        // بارگذاری اولیه
+        if (webView.getUrl() == null) {
+            webView.loadUrl(BASE_URL);
         }
     }
 
-    // ═══════════════════════════════════════════════════════════
-    // اتصال به Chrome سپس باز کردن Custom Tab
-    // ═══════════════════════════════════════════════════════════
-    private void connectAndOpen() {
-        connection = new CustomTabsServiceConnection() {
+    @SuppressLint("SetJavaScriptEnabled")
+    private void setupWebView() {
+        WebSettings settings = webView.getSettings();
+        settings.setJavaScriptEnabled(true);
+        settings.setDomStorageEnabled(true);
+        settings.setDatabaseEnabled(true);
+        settings.setAllowFileAccess(true);
+        settings.setAllowContentAccess(true);
+        settings.setLoadWithOverviewMode(true);
+        settings.setUseWideViewPort(true);
+        settings.setSupportZoom(false);
+        settings.setBuiltInZoomControls(false);
+        settings.setMediaPlaybackRequiresUserGesture(false);
+        settings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
+        settings.setGeolocationEnabled(true);
+        settings.setJavaScriptCanOpenWindowsAutomatically(true);
+        settings.setSupportMultipleWindows(false);
+
+        webView.setWebViewClient(new WebViewClient() {
             @Override
-            public void onCustomTabsServiceConnected(ComponentName name, CustomTabsClient client) {
-                customTabsClient = client;
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                Uri uri = Uri.parse(url);
+                String host = uri.getHost();
+                String scheme = uri.getScheme();
+
+                // Deep link به اپ
+                if (APP_SCHEME.equals(scheme)) {
+                    handleDeepLink(uri);
+                    return true;
+                }
+
+                // لینک‌های داخلی سایت → داخل WebView
+                if (host != null && host.contains("picassooads.ir")) {
+                    return false;
+                }
+
+                // لینک‌های خارجی → مرورگر
                 try {
-                    customTabsClient.warmup(0L);
-                    customTabsSession = customTabsClient.newSession(null);
+                    startActivity(new Intent(Intent.ACTION_VIEW, uri));
                 } catch (Exception ignored) {}
-                openCustomTab();
+                return true;
             }
+        });
 
+        webView.setWebChromeClient(new WebChromeClient() {
             @Override
-            public void onServiceDisconnected(ComponentName name) {
-                customTabsClient = null;
-                customTabsSession = null;
+            public void onPermissionRequest(android.webkit.PermissionRequest request) {
+                runOnUiThread(() -> request.grant(request.getResources()));
             }
-        };
+        });
 
-        // تلاش برای اتصال به Chrome (پایدار → بتا → dev → پیش‌فرض)
-        boolean bound = false;
-        try {
-            bound = CustomTabsClient.bindCustomTabsService(this, CHROME_PACKAGE, connection);
-            if (!bound) {
-                bound = CustomTabsClient.bindCustomTabsService(this, CHROME_BETA_PACKAGE, connection);
-            }
-            if (!bound) {
-                bound = CustomTabsClient.bindCustomTabsService(this, CHROME_DEV_PACKAGE, connection);
-            }
-        } catch (Exception ignored) {}
+        // JS Bridge
+        webView.addJavascriptInterface(new BiometricBridge(), "AndroidBiometric");
+    }
 
-        // اگه اتصال موفق نبود، مستقیم باز کن
-        if (!bound) {
-            openCustomTab();
+    // ═══════════════════════════════════════════════════════════
+    // JS Bridge — از داخل WebView صدا زده می‌شه
+    // ═══════════════════════════════════════════════════════════
+    public class BiometricBridge {
+
+        @JavascriptInterface
+        public boolean isApp() {
+            return true;
+        }
+
+        @JavascriptInterface
+        public String getPlatform() {
+            return "android-app";
+        }
+
+        @JavascriptInterface
+        public void openBiometric(String url) {
+            if (url == null || url.isEmpty()) return;
+            runOnUiThread(() -> openBiometricCustomTab(url));
         }
     }
 
     // ═══════════════════════════════════════════════════════════
-    // باز کردن Custom Tab
+    // باز کردن Custom Tab فقط برای بیومتریک
     // ═══════════════════════════════════════════════════════════
-    private void openCustomTab() {
-        if (urlOpened) return;
-        urlOpened = true;
-
-        CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
-
-        // رنگ نوار ابزار
+    private void openBiometricCustomTab(String url) {
         try {
-            builder.setToolbarColor(
-                ContextCompat.getColor(this, R.color.colorPrimary)
-            );
-            builder.setSecondaryToolbarColor(
-                ContextCompat.getColor(this, R.color.colorPrimaryDark)
-            );
-        } catch (Exception ignored) {}
+            CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
+            builder.setToolbarColor(ContextCompat.getColor(this, R.color.colorPrimary));
+            builder.setShowTitle(false);
+            builder.setUrlBarHidingEnabled(true);
+            builder.setStartAnimations(this, android.R.anim.fade_in, android.R.anim.fade_out);
+            builder.setExitAnimations(this, android.R.anim.fade_in, android.R.anim.fade_out);
 
-        // مخفی کردن عنوان (برای ظاهر native)
-        builder.setShowTitle(false);
+            CustomTabsIntent intent = builder.build();
+            intent.intent.setPackage(CHROME_PACKAGE);
 
-        // ✅ مخفی شدن خودکار نوار آدرس هنگام اسکرول
-        builder.setUrlBarHidingEnabled(true);
-
-        // انیمیشن‌ها
-        builder.setStartAnimations(this, android.R.anim.fade_in, android.R.anim.fade_out);
-        builder.setExitAnimations(this, android.R.anim.fade_in, android.R.anim.fade_out);
-
-        // Instant Apps غیرفعال
-        try {
-            builder.setInstantAppsEnabled(false);
-        } catch (Exception ignored) {}
-
-        // اتصال به session اگه موجود
-        if (customTabsSession != null) {
             try {
-                builder.setSession(customTabsSession);
-            } catch (Exception ignored) {}
+                intent.launchUrl(this, Uri.parse(url));
+            } catch (Exception e) {
+                intent.intent.setPackage(null);
+                intent.launchUrl(this, Uri.parse(url));
+            }
+        } catch (Exception e) {
+            // اگه هیچی نشد، داخل WebView باز کن
+            if (webView != null) webView.loadUrl(url);
         }
+    }
 
-        CustomTabsIntent customTabsIntent = builder.build();
+    // ═══════════════════════════════════════════════════════════
+    // Deep Link handling
+    // ═══════════════════════════════════════════════════════════
+    private void handleIntent(Intent intent) {
+        if (intent == null || intent.getData() == null) return;
+        handleDeepLink(intent.getData());
+    }
 
-        // اول با Chrome امتحان کن
-        customTabsIntent.intent.setPackage(CHROME_PACKAGE);
+    private void handleDeepLink(Uri uri) {
+        if (uri == null) return;
 
-        try {
-            customTabsIntent.launchUrl(this, Uri.parse(APP_URL));
-            finish();
+        String host = uri.getHost();
+        String path = uri.getPath();
+
+        // boost://biometric-success
+        if (APP_SCHEME.equals(uri.getScheme())) {
+            if ("biometric-success".equals(host) || (path != null && path.contains("biometric-success"))) {
+                // برگرد به اپ و reload کن
+                if (webView != null) {
+                    webView.reload();
+                }
+            }
             return;
-        } catch (ActivityNotFoundException e) {
-            // Chrome نبود → با مرورگر پیش‌فرض
-        } catch (Exception e) {
-            // هر خطای دیگه
         }
 
-        // استفاده از مرورگر پیش‌فرض
-        customTabsIntent.intent.setPackage(null);
-        try {
-            customTabsIntent.launchUrl(this, Uri.parse(APP_URL));
-        } catch (Exception e) {
-            // اگه همه چی شکست خورد → با Intent معمولی
-            try {
-                Intent fallback = new Intent(Intent.ACTION_VIEW, Uri.parse(APP_URL));
-                fallback.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(fallback);
-            } catch (Exception ignored) {}
+        // https://boom.picassooads.ir/... با پارامتر biometric=success
+        if (host != null && host.contains("picassooads.ir")) {
+            String biometric = uri.getQueryParameter("biometric");
+            if ("success".equals(biometric)) {
+                if (webView != null) webView.reload();
+            }
         }
-
-        finish();
     }
 
-    // ═══════════════════════════════════════════════════════════
-    // Cleanup
-    // ═══════════════════════════════════════════════════════════
     @Override
-    protected void onDestroy() {
-        if (connection != null) {
-            try {
-                unbindService(connection);
-            } catch (Exception ignored) {}
-            connection = null;
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        handleIntent(intent);
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK && webView != null && webView.canGoBack()) {
+            webView.goBack();
+            return true;
         }
-        super.onDestroy();
+        return super.onKeyDown(keyCode, event);
     }
 }
