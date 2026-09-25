@@ -33,7 +33,6 @@
          Queries (الزامی برای Custom Tabs و Deep Linking)
          ═══════════════════════════════════════════════════════════ -->
     <queries>
-        <!-- Custom Tabs و مرورگرها -->
         <intent>
             <action android:name="android.intent.action.VIEW" />
             <data android:scheme="https" />
@@ -62,10 +61,34 @@
             android:windowSoftInputMode="adjustResize"
             android:theme="@style/AppTheme">
 
+            <!-- ═══ Launcher ═══ -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
+            <!-- ═══════════════════════════════════════════════════
+                 Deep Link 1: boomapp://
+                 برای وقتی که Custom Tab می‌خواد به اپ برگرده
+                 ═══════════════════════════════════════════════════ -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="boomapp" />
+            </intent-filter>
+
+            <!-- ═══════════════════════════════════════════════════
+                 Deep Link 2: https://boom.picassooads.ir
+                 برای برگشت خودکار از Custom Tab به اپ
+                 ═══════════════════════════════════════════════════ -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="boom.picassooads.ir" />
+            </intent-filter>
+
         </activity>
 
     </application>
