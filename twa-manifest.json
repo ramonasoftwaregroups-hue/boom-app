@@ -72,5 +72,6 @@
     "standalone",
     "minimal-ui"
   ],
+  "isTrustedWebActivity": false,
   "appVersion": "1"
 }
