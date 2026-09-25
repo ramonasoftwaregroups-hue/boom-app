@@ -1,21 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <!-- ═══════════ Shortcut (حفظ شده) ═══════════ -->
     <color name="shortcut_background">#F5F5F5</color>
-
-    <!-- ═══════════ رنگ برند ═══════════ -->
     <color name="colorPrimary">#007E93</color>
     <color name="colorPrimaryDark">#00556B</color>
     <color name="colorAccent">#00B3C9</color>
-
-    <!-- ═══════════ پس‌زمینه سفید ═══════════ -->
     <color name="backgroundColor">#FFFFFF</color>
-    <color name="navigationColor">#FFFFFF</color>
-
-    <!-- ═══════════ رنگ‌های کمکی ═══════════ -->
-    <color name="white">#FFFFFF</color>
-    <color name="black">#000000</color>
-    <color name="transparent">#00000000</color>
-
+    <color name="navigationColor">#007E93</color>
 </resources>
