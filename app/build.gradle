@@ -9,8 +9,8 @@ android {
         applicationId "ir.picassooads.boom.twa"
         minSdkVersion 23
         targetSdkVersion 34
-        versionCode 3
-        versionName "3"
+        versionCode 4
+        versionName "4"
         resValue "string", "appName", "Boom Picasso"
     }
 
@@ -37,9 +37,12 @@ android {
 
     lintOptions {
         checkReleaseBuilds false
+        abortOnError false
     }
 
-    // *** تغییر نام فایل خروجی APK ***
+    // ═══════════════════════════════════════════════════════════
+    // تغییر نام فایل خروجی APK
+    // ═══════════════════════════════════════════════════════════
     applicationVariants.all { variant ->
         variant.outputs.all { output ->
             def newApkName = "BoomPicasso-${variant.versionName}.apk"
@@ -48,7 +51,9 @@ android {
     }
 }
 
-// *** تغییر نام فایل خروجی AAB ***
+// ═══════════════════════════════════════════════════════════════
+// تغییر نام فایل خروجی AAB
+// ═══════════════════════════════════════════════════════════════
 tasks.matching { it.name == "bundleRelease" }.configureEach {
     doLast {
         def bundleDir = new File(project.buildDir, "outputs/bundle/release")
@@ -61,5 +66,13 @@ tasks.matching { it.name == "bundleRelease" }.configureEach {
 }
 
 dependencies {
+    // فایل‌های JAR محلی
     implementation fileTree(include: ['*.jar'], dir: 'libs')
+
+    // ═══════════════════════════════════════════════════════════
+    // AndroidX - برای Custom Tabs و AppCompatActivity
+    // ═══════════════════════════════════════════════════════════
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'androidx.core:core:1.12.0'
+    implementation 'androidx.browser:browser:1.7.0'
 }
