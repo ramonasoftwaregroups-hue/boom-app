@@ -1,75 +1,176 @@
 package ir.picassooads.boom.twa;
 
-import android.annotation.SuppressLint;
-import android.app.Activity;
+import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.view.KeyEvent;
-import android.view.View;
-import android.webkit.WebChromeClient;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
-import android.widget.ProgressBar;
 
-public class MainActivity extends Activity {
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.browser.customtabs.CustomTabsClient;
+import androidx.browser.customtabs.CustomTabsIntent;
+import androidx.browser.customtabs.CustomTabsServiceConnection;
+import androidx.browser.customtabs.CustomTabsSession;
+import androidx.core.content.ContextCompat;
 
-    private WebView webView;
-    private ProgressBar progressBar;
-    private final String START_URL = "https://boom.picassooads.ir/panel/pwa/splash.html?source=pwa";
+public class MainActivity extends AppCompatActivity {
 
-    @SuppressLint("SetJavaScriptEnabled")
+    // ═══════════════════════════════════════════════════════════
+    // Constants
+    // ═══════════════════════════════════════════════════════════
+    private static final String APP_URL = "https://boom.picassooads.ir/panel/pwa/splash.html?source=pwa";
+    private static final String CHROME_PACKAGE = "com.android.chrome";
+    private static final String CHROME_BETA_PACKAGE = "com.chrome.beta";
+    private static final String CHROME_DEV_PACKAGE = "com.chrome.dev";
+
+    // ═══════════════════════════════════════════════════════════
+    // Custom Tabs State
+    // ═══════════════════════════════════════════════════════════
+    private CustomTabsClient customTabsClient;
+    private CustomTabsSession customTabsSession;
+    private CustomTabsServiceConnection connection;
+    private boolean urlOpened = false;
+
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
 
-        webView = findViewById(R.id.webview);
-        progressBar = findViewById(R.id.progressbar);
+        // رنگ نوار وضعیت
+        try {
+            getWindow().setStatusBarColor(
+                ContextCompat.getColor(this, R.color.colorPrimary)
+            );
+        } catch (Exception ignored) {}
 
-        WebSettings settings = webView.getSettings();
-        settings.setJavaScriptEnabled(true);
-        settings.setDomStorageEnabled(true);
-        settings.setAllowFileAccess(true);
-        settings.setAllowContentAccess(true);
-        settings.setLoadWithOverviewMode(true);
-        settings.setUseWideViewPort(true);
-        settings.setSupportZoom(false);
-        settings.setBuiltInZoomControls(false);
-        settings.setMediaPlaybackRequiresUserGesture(false);
-        settings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
-
-        webView.setWebViewClient(new WebViewClient() {
-            @Override
-            public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                if (Uri.parse(url).getHost() != null &&
-                    !Uri.parse(url).getHost().contains("picassooads.ir")) {
-                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
-                    return true;
-                }
-                view.loadUrl(url);
-                return false;
-            }
-        });
-
-        webView.setWebChromeClient(new WebChromeClient() {
-            @Override
-            public void onProgressChanged(WebView view, int newProgress) {
-                progressBar.setProgress(newProgress);
-                progressBar.setVisibility(newProgress == 100 ? View.GONE : View.VISIBLE);
-            }
-        });
-
-        webView.loadUrl(START_URL);
+        // اگه اپ توی Back Stack برگشته بود، دوباره باز کن
+        if (savedInstanceState != null && !urlOpened) {
+            openCustomTab();
+        } else {
+            connectAndOpen();
+        }
     }
 
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK && webView.canGoBack()) {
-            webView.goBack();
-            return true;
+    // ═══════════════════════════════════════════════════════════
+    // اتصال به Chrome سپس باز کردن Custom Tab
+    // ═══════════════════════════════════════════════════════════
+    private void connectAndOpen() {
+        connection = new CustomTabsServiceConnection() {
+            @Override
+            public void onCustomTabsServiceConnected(ComponentName name, CustomTabsClient client) {
+                customTabsClient = client;
+                try {
+                    customTabsClient.warmup(0L);
+                    customTabsSession = customTabsClient.newSession(null);
+                } catch (Exception ignored) {}
+                openCustomTab();
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+                customTabsClient = null;
+                customTabsSession = null;
+            }
+        };
+
+        // تلاش برای اتصال به Chrome (پایدار → بتا → dev → پیش‌فرض)
+        boolean bound = false;
+        try {
+            bound = CustomTabsClient.bindCustomTabsService(this, CHROME_PACKAGE, connection);
+            if (!bound) {
+                bound = CustomTabsClient.bindCustomTabsService(this, CHROME_BETA_PACKAGE, connection);
+            }
+            if (!bound) {
+                bound = CustomTabsClient.bindCustomTabsService(this, CHROME_DEV_PACKAGE, connection);
+            }
+        } catch (Exception ignored) {}
+
+        // اگه اتصال موفق نبود، مستقیم باز کن
+        if (!bound) {
+            openCustomTab();
         }
-        return super.onKeyDown(keyCode, event);
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // باز کردن Custom Tab
+    // ═══════════════════════════════════════════════════════════
+    private void openCustomTab() {
+        if (urlOpened) return;
+        urlOpened = true;
+
+        CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
+
+        // رنگ نوار ابزار
+        try {
+            builder.setToolbarColor(
+                ContextCompat.getColor(this, R.color.colorPrimary)
+            );
+            builder.setSecondaryToolbarColor(
+                ContextCompat.getColor(this, R.color.colorPrimaryDark)
+            );
+        } catch (Exception ignored) {}
+
+        // مخفی کردن عنوان (برای ظاهر native)
+        builder.setShowTitle(false);
+
+        // انیمیشن‌ها
+        builder.setStartAnimations(this, android.R.anim.fade_in, android.R.anim.fade_out);
+        builder.setExitAnimations(this, android.R.anim.fade_in, android.R.anim.fade_out);
+
+        // Instant Apps غیرفعال
+        try {
+            builder.setInstantAppsEnabled(false);
+        } catch (Exception ignored) {}
+
+        // اتصال به session اگه موجود
+        if (customTabsSession != null) {
+            try {
+                builder.setSession(customTabsSession);
+            } catch (Exception ignored) {}
+        }
+
+        CustomTabsIntent customTabsIntent = builder.build();
+
+        // اول با Chrome امتحان کن
+        customTabsIntent.intent.setPackage(CHROME_PACKAGE);
+
+        try {
+            customTabsIntent.launchUrl(this, Uri.parse(APP_URL));
+            finish();
+            return;
+        } catch (ActivityNotFoundException e) {
+            // Chrome نبود → با مرورگر پیش‌فرض
+        } catch (Exception e) {
+            // هر خطای دیگه
+        }
+
+        // استفاده از مرورگر پیش‌فرض
+        customTabsIntent.intent.setPackage(null);
+        try {
+            customTabsIntent.launchUrl(this, Uri.parse(APP_URL));
+        } catch (Exception e) {
+            // اگه همه چی شکست خورد → با Intent معمولی
+            try {
+                Intent fallback = new Intent(Intent.ACTION_VIEW, Uri.parse(APP_URL));
+                fallback.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(fallback);
+            } catch (Exception ignored) {}
+        }
+
+        finish();
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // Cleanup
+    // ═══════════════════════════════════════════════════════════
+    @Override
+    protected void onDestroy() {
+        if (connection != null) {
+            try {
+                unbindService(connection);
+            } catch (Exception ignored) {}
+            connection = null;
+        }
+        super.onDestroy();
     }
 }
