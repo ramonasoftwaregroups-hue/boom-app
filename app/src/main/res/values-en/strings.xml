@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- ═══════════ App name (NOT translated) ═══════════ -->
+    <string name="appName" translatable="false">Boom Picasso</string>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         SPLASH
+         ═══════════════════════════════════════════════════════════ -->
+    <string name="splash_title">Boom Picasso</string>
+    <string name="splash_subtitle">Content Studio</string>
+    <string name="splash_caption">Member of the great family</string>
+    <string name="splash_accent">Picasso Advertising Agency</string>
+    <string name="splash_checking">Checking…</string>
+    <string name="splash_version_prefix" translatable="false">v</string>
+    <string name="splash_logo_boom">Boom Picasso</string>
+    <string name="splash_logo_picasso">Picasso</string>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         BRAND
+         ═══════════════════════════════════════════════════════════ -->
+    <string name="brand_name">Boom Picasso</string>
+    <string name="brand_tagline">Native to craft your story</string>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         LOGIN SCREEN
+         ═══════════════════════════════════════════════════════════ -->
+    <string name="login_tab_password">Password</string>
+    <string name="login_tab_otp">SMS Code</string>
+    <string name="login_hint_login">Username or phone number</string>
+    <string name="login_hint_password">Password</string>
+    <string name="login_hint_otp">6-digit code</string>
+    <string name="login_button">Sign in</string>
+    <string name="login_forgot_password">Forgot your password?</string>
+    <string name="login_register_now">Don\'t have an account? Sign up</string>
+    <string name="login_send_code">Send code</string>
+    <string name="login_verify">Verify &amp; sign in</string>
+    <string name="login_resend">Resend</string>
+    <string name="login_back">Back</string>
+    <string name="login_biometric_hint">Sign in with fingerprint</string>
+    <string name="login_loading">Signing in…</string>
+    <string name="login_sending_code">Sending code…</string>
+    <string name="login_verifying">Verifying…</string>
+    <string name="login_secure_note">Secured by Boom standards</string>
+
+    <!-- LOGIN — Errors -->
+    <string name="login_error_empty_login">Enter your username or phone number</string>
+    <string name="login_error_empty_password">Enter your password</string>
+    <string name="login_error_empty_code">Enter the 6-digit code</string>
+    <string name="login_error_invalid_credentials">Invalid username or password</string>
+    <string name="login_error_invalid_code">The code you entered is incorrect</string>
+    <string name="login_error_rate_limit">Too many attempts. Please try again in a few minutes.</string>
+    <string name="login_error_sms_failed">Failed to send SMS. Please try again.</string>
+    <string name="login_error_no_user_biometric">Biometric is not enabled for this user</string>
+    <string name="login_error_biometric_cancelled">Biometric sign-in was cancelled</string>
+    <string name="login_error_network">Check your internet connection</string>
+    <string name="login_error_server">Server connection error</string>
+    <string name="login_error_generic">Something went wrong. Please try again</string>
+
+    <!-- LOGIN — Info -->
+    <string name="login_info_otp_sent">Verification code sent to %1$s</string>
+    <string name="login_info_generic_sent">If the information is correct, a verification code will be sent</string>
+    <string name="login_info_resend_cooldown">Resend in %1$d seconds</string>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         REGISTER SCREEN
+         ═══════════════════════════════════════════════════════════ -->
+    <string name="register_title">Sign up</string>
+    <string name="register_step1">Account info</string>
+    <string name="register_step2">Phone number</string>
+    <string name="register_step3">Final verification</string>
+    <string name="register_hint_first_name">First name</string>
+    <string name="register_hint_last_name">Last name</string>
+    <string name="register_hint_username">Username</string>
+    <string name="register_hint_password">Password</string>
+    <string name="register_hint_confirm_password">Confirm password</string>
+    <string name="register_hint_phone">Phone number</string>
+    <string name="register_username_help">Only English letters, numbers and underscore</string>
+    <string name="register_password_help">At least 8 characters with upper/lowercase, number and symbol</string>
+    <string name="register_phone_help">Example: 0912 345 6789</string>
+    <string name="register_username_checking">Checking…</string>
+    <string name="register_username_available">Available</string>
+    <string name="register_username_taken">This username is taken</string>
+    <string name="register_username_min">At least 3 characters</string>
+    <string name="register_agree_pre">I agree to the</string>
+    <string name="register_terms">Terms of use</string>
+    <string name="register_and">and</string>
+    <string name="register_privacy">Privacy Policy</string>
+    <string name="register_agree_post"></string>
+    <string name="register_next">Continue</string>
+    <string name="register_prev">Previous</string>
+    <string name="register_send_code">Send verification code</string>
+    <string name="register_create_account">Verify &amp; create account</string>
+    <string name="register_otp_sent_to">Code sent to</string>
+    <string name="register_loading">Signing up…</string>
+    <string name="register_creating">Creating account…</string>
+
+    <!-- REGISTER — Password strength -->
+    <string name="pw_very_weak">Very weak</string>
+    <string name="pw_weak">Weak</string>
+    <string name="pw_medium">Medium</string>
+    <string name="pw_good">Good</string>
+    <string name="pw_strong">Strong</string>
+
+    <!-- REGISTER — Errors -->
+    <string name="register_error_fill_required">Please fill in all required fields</string>
+    <string name="register_error_name_short">First and last name must be at least 2 characters</string>
+    <string name="register_error_username_format">Username must be 3-50 characters with English letters, numbers and underscore</string>
+    <string name="register_error_username_taken">This username is already taken</string>
+    <string name="register_error_phone_invalid">Enter a valid phone number (09xxxxxxxxx)</string>
+    <string name="register_error_phone_taken">This phone number is already registered</string>
+    <string name="register_error_password_weak">Password must be at least 8 characters with upper/lowercase, number and special character</string>
+    <string name="register_error_password_mismatch">Passwords do not match</string>
+    <string name="register_error_accept_terms">You must accept the terms and privacy policy</string>
+    <string name="register_error_otp_expired">Code expired. Please request a new one</string>
+    <string name="register_error_otp_attempts">Too many attempts. Please request a new code</string>
+    <string name="register_error_otp_invalid">Invalid verification code</string>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         FORGOT PASSWORD SCREEN
+         ═══════════════════════════════════════════════════════════ -->
+    <string name="forgot_title">Password recovery</string>
+    <string name="forgot_step1">Request code</string>
+    <string name="forgot_step2">Verify code</string>
+    <string name="forgot_step3">New password</string>
+    <string name="forgot_heading">Forgot your password?</string>
+    <string name="forgot_sub">Enter your username or phone number to receive a recovery code</string>
+    <string name="forgot_hint_login">Username or phone number</string>
+    <string name="forgot_hint_code">6-digit code</string>
+    <string name="forgot_hint_new_password">New password</string>
+    <string name="forgot_hint_confirm_password">Confirm new password</string>
+    <string name="forgot_send_code">Send recovery code</string>
+    <string name="forgot_verify">Verify code</string>
+    <string name="forgot_reset">Change password</string>
+    <string name="forgot_otp_sent_to">Code sent to</string>
+    <string name="forgot_loading">Sending…</string>
+    <string name="forgot_resetting">Changing password…</string>
+    <string name="forgot_success">Password changed successfully. Please sign in again</string>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         SUCCESS SCREEN
+         ═══════════════════════════════════════════════════════════ -->
+    <string name="success_welcome">Welcome!</string>
+    <string name="success_account_created">Your account was created successfully</string>
+    <string name="success_password_changed">Your password was changed successfully</string>
+    <string name="success_redirecting">Redirecting…</string>
+    <string name="success_go_dashboard">Go to dashboard</string>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         OTP — Common
+         ═══════════════════════════════════════════════════════════ -->
+    <string name="otp_title">Enter verification code</string>
+    <string name="otp_sub">6-digit code sent to</string>
+    <string name="otp_resend">Resend</string>
+    <string name="otp_resend_timer">(%1$d)</string>
+    <string name="otp_back">Back</string>
+    <string name="otp_verify">Verify</string>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         COMMON / SHARED
+         ═══════════════════════════════════════════════════════════ -->
+    <string name="common_or">or</string>
+    <string name="common_back">Back</string>
+    <string name="common_next">Continue</string>
+    <string name="common_cancel">Cancel</string>
+    <string name="common_confirm">Confirm</string>
+    <string name="common_ok">OK</string>
+    <string name="common_close">Close</string>
+    <string name="common_retry">Retry</string>
+    <string name="common_loading">Loading…</string>
+    <string name="common_error">Error</string>
+    <string name="common_success">Success</string>
+    <string name="common_designed_by">Designed by</string>
+    <string name="common_agency">Picasso Agency</string>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         THEME + LANGUAGE
+         ═══════════════════════════════════════════════════════════ -->
+    <string name="theme_toggle">Toggle theme</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="theme_auto">Auto</string>
+    <string name="language_toggle">Change language</string>
+    <string name="language_choose">Choose language</string>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         BIOMETRIC PROMPT
+         ═══════════════════════════════════════════════════════════ -->
+    <string name="biometric_title">Biometric sign-in</string>
+    <string name="biometric_subtitle">Verify your identity to continue</string>
+    <string name="biometric_description">Use your fingerprint or face</string>
+    <string name="biometric_cancel">Cancel</string>
+    <string name="biometric_not_available">Your device has no biometric support</string>
+    <string name="biometric_not_enrolled">Set up fingerprint or face unlock in your phone settings first</string>
+    <string name="biometric_error">Biometric authentication error</string>
+    <string name="biometric_lockout">Biometric is temporarily locked. Sign in with your password</string>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         LOGOUT
+         ═══════════════════════════════════════════════════════════ -->
+    <string name="logout_title">Sign out</string>
+    <string name="logout_message">Are you sure you want to sign out?</string>
+    <string name="logout_confirm">Sign out</string>
+    <string name="logout_cancel">Cancel</string>
+
+</resources>
