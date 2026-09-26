@@ -22,4 +22,7 @@
 
     <color name="boomError">#EF4444</color>
 
+    <!-- ═══════════════ رنگ Shortcut (TWA) ═══════════════ -->
+    <color name="shortcut_background">#007C93</color>
+
 </resources>
