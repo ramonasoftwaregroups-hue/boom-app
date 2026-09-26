@@ -24,9 +24,22 @@ import com.google.android.material.textfield.TextInputLayout;
 
 import org.json.JSONObject;
 
+/**
+ * ═══════════════════════════════════════════════════════════════
+ * LoginActivity — صفحه‌ی ورود نیتیو
+ * 
+ * v3 — اصلاحات:
+ *   • چک کامل اعتبار سشن با isSessionValid() به جای isLoggedIn()
+ *   • پاک کردن سشن منقضی در onCreate
+ *   • لود لوگوی Picasso در فوتر
+ * ═══════════════════════════════════════════════════════════════
+ */
 public class LoginActivity extends AppCompatActivity {
 
     private static final String TAG = "LoginActivity";
+
+    private static final String PICASSO_FOOTER_URL =
+            "https://boom.picassooads.ir/assets/images/logo_motion.gif";
 
     /* Views */
     private TabLayout loginTabs;
@@ -37,6 +50,7 @@ public class LoginActivity extends AppCompatActivity {
     private TextView errorText, otpSub, langCode;
     private FrameLayout themeBtn, langBtn, biometricBtn;
     private ImageView themeIcon;
+    private ImageView picassoLogo;
     private EditText[] otpBoxes = new EditText[6];
 
     /* State */
@@ -60,9 +74,13 @@ public class LoginActivity extends AppCompatActivity {
 
         session = new SessionManager(this);
 
-        if (session.isLoggedIn()) {
+        // ★ چک کامل: توکن معتبر است (نه فقط موجود بودن)
+        if (session.isSessionValid()) {
             goToMain();
             return;
+        } else if (session.isLoggedIn()) {
+            // توکن هست ولی منقضی/نامعتبر → پاکش کن
+            session.clear();
         }
 
         setContentView(R.layout.activity_login);
@@ -85,6 +103,9 @@ public class LoginActivity extends AppCompatActivity {
 
         // به‌روزرسانی آیکون تم
         updateThemeIcon();
+
+        // ★ لود لوگوی Picasso در فوتر
+        loadPicassoFooter();
     }
 
     /* ═══════════════════════════════════════════════════════════
@@ -112,6 +133,7 @@ public class LoginActivity extends AppCompatActivity {
         biometricBtn = findViewById(R.id.biometricBtn);
         themeIcon = findViewById(R.id.themeIcon);
         langCode = findViewById(R.id.langCode);
+        picassoLogo = findViewById(R.id.picassoLogo);
 
         otpBoxes[0] = findViewById(R.id.otp1);
         otpBoxes[1] = findViewById(R.id.otp2);
@@ -342,7 +364,6 @@ public class LoginActivity extends AppCompatActivity {
                 String masked = response.optString("phone_masked", "");
                 otpSub.setText(getString(R.string.login_info_otp_sent, masked));
 
-                // تغییر متن دکمه
                 verifyOtpBtn.setText(R.string.login_verify);
 
                 clearOtpBoxes();
@@ -445,8 +466,39 @@ public class LoginActivity extends AppCompatActivity {
        BIOMETRIC
        ═══════════════════════════════════════════════════════════ */
     private void onBiometric() {
-        // ★ فعلاً toast — بعداً BiometricPrompt نیتیو اضافه می‌شود
         Toast.makeText(this, R.string.biometric_not_available, Toast.LENGTH_SHORT).show();
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       ★ LOAD PICASSO FOOTER
+       ═══════════════════════════════════════════════════════════ */
+    private void loadPicassoFooter() {
+        if (picassoLogo == null) return;
+
+        new Thread(() -> {
+            try {
+                java.net.URL url = new java.net.URL(PICASSO_FOOTER_URL);
+                java.net.HttpURLConnection conn =
+                        (java.net.HttpURLConnection) url.openConnection();
+                conn.setConnectTimeout(5000);
+                conn.setReadTimeout(5000);
+                conn.setInstanceFollowRedirects(true);
+                conn.connect();
+
+                if (conn.getResponseCode() == 200) {
+                    try (java.io.InputStream is = conn.getInputStream()) {
+                        final android.graphics.Bitmap bm =
+                                android.graphics.BitmapFactory.decodeStream(is);
+                        if (bm != null) {
+                            runOnUiThread(() -> picassoLogo.setImageBitmap(bm));
+                        }
+                    }
+                }
+                conn.disconnect();
+            } catch (Exception e) {
+                Log.w(TAG, "picasso footer load failed", e);
+            }
+        }).start();
     }
 
     /* ═══════════════════════════════════════════════════════════
