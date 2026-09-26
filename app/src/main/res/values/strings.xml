@@ -17,26 +17,15 @@
 <resources>
 
     <!-- ═══════════ نام اپ ═══════════ -->
-    <!-- این خیلی مهمه - بدون این، اپ نصب نمی‌شه -->
     <string name="appName" translatable="false">Boom Picasso</string>
 
     <!-- ═══════════ Display Override (TWA) ═══════════ -->
-    <!--
-      The "fullscreen" and "fullscreen-sticky" TWA manifest values correspond
-      to "immersive" and "sticky-immersive" AndroidManifest values.
-    -->
     <string-array name="display_override">
         <item>standalone</item>
         <item>minimal-ui</item>
     </string-array>
 
     <!-- ═══════════ Digital Asset Links (TWA) ═══════════ -->
-    <!--
-      This variable below expresses the relationship between the app and the site,
-      as documented in the TWA documentation at
-      https://developers.google.com/web/updates/2017/10/using-twa#set_up_digital_asset_links_in_an_android_app
-      and is injected into the AndroidManifest.xml
-    -->
     <string name="assetStatements" translatable="false">
         [{
             \"relation\": [\"delegate_permission/common.handle_all_urls\"],
@@ -46,5 +35,24 @@
             }
         }]
     </string>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         Login Screen — رشته‌های صفحه ورود نیتیو
+         ═══════════════════════════════════════════════════════════ -->
+    <string name="login_welcome_subtitle">برای ادامه وارد شوید</string>
+    <string name="login_tab_password">ورود با رمز</string>
+    <string name="login_tab_otp">ورود با کد</string>
+    <string name="login_hint_login">نام کاربری یا شماره همراه</string>
+    <string name="login_hint_password">رمز عبور</string>
+    <string name="login_button">ورود به حساب</string>
+    <string name="login_forgot_password">رمز عبور را فراموش کرده‌اید؟</string>
+    <string name="login_or">یا</string>
+    <string name="login_register_now">حساب کاربری ندارید؟ ثبت‌نام کنید</string>
+    <string name="login_footer">امن‌شده با استانداردهای امنیتی بوم</string>
+    <string name="login_send_code">دریافت کد تأیید</string>
+    <string name="login_error_empty_login">نام کاربری یا شماره همراه را وارد کنید</string>
+    <string name="login_error_empty_password">رمز عبور را وارد کنید</string>
+    <string name="login_loading">در حال ورود...</string>
+    <string name="login_sending_code">در حال ارسال کد...</string>
 
 </resources>
