@@ -2,13 +2,11 @@ package ir.picassooads.boom.twa;
 
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -32,21 +30,16 @@ import java.net.URL;
  * SplashActivity — صفحه‌ی شروع سینمایی
  * 
  * دو صحنه:
- *   Scene 1 (۰-۲.۶s): لوگوی BOOM
+ *   Scene 1 (۰-۲.۶s): لوگوی BOOM (سفیدشده)
  *   Scene 2 (۲.۶-۵.۲s): لوگوی Picasso
  * 
- * v3 — اصلاحات امنیتی:
- *   • همیشه به LoginActivity می‌رود (بدون چک سشن)
- *   • چون ما نمی‌خواهیم توکن ذخیره شود، هر بار کاربر باید وارد شود
+ * v4 — اصلاحات:
+ *   • لوگوها از drawable محلی لود می‌شوند (بدون وقفه، آفلاین)
+ *   • attachBaseContext برای اعمال زبان
+ *   • همیشه به LoginActivity می‌رود
  * ═══════════════════════════════════════════════════════════════
  */
 public class SplashActivity extends AppCompatActivity {
-
-    private static final String BOOM_LOGO_URL =
-            "https://boom.picassooads.ir/assets/images/boom.png";
-
-    private static final String PICASSO_LOGO_URL =
-            "https://picassooads.ir/shared/assets/images/logoW.png";
 
     /* ★ Timings */
     private static final long SCENE1_DURATION = 2600;
@@ -61,6 +54,16 @@ public class SplashActivity extends AppCompatActivity {
 
     private final Handler handler = new Handler(Looper.getMainLooper());
     private boolean navigated = false;
+
+    /* ═══════════════════════════════════════════════════════════
+       ★ attachBaseContext — اعمال زبان روی کل Activity
+       ═══════════════════════════════════════════════════════════ */
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        String lang = LocaleHelper.getLanguage(newBase);
+        Context ctx = LocaleHelper.applyLocale(newBase, lang);
+        super.attachBaseContext(ctx);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,22 +108,23 @@ public class SplashActivity extends AppCompatActivity {
     }
 
     /* ═══════════════════════════════════════════════════════════
-       SCENE 1 — لوگوی BOOM
+       SCENE 1 — لوگوی BOOM (از drawable محلی)
        ═══════════════════════════════════════════════════════════ */
     private void setupScene1() {
         // فیلتر سفید — مثل filter: brightness(0) invert(1) در وب
         scene1Logo.setColorFilter(
                 new PorterDuffColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN));
 
-        // لوگوی BOOM از URL
-        loadImageFromUrl(BOOM_LOGO_URL, scene1Logo);
+        // ★ لوگوی BOOM از drawable — بدون وقفه
+        scene1Logo.setImageResource(R.drawable.boom);
     }
 
     /* ═══════════════════════════════════════════════════════════
-       SCENE 2 — لوگوی Picasso
+       SCENE 2 — لوگوی Picasso (از drawable محلی)
        ═══════════════════════════════════════════════════════════ */
     private void setupScene2() {
-        loadImageFromUrl(PICASSO_LOGO_URL, scene2Logo);
+        // ★ لوگوی Picasso از drawable — بدون وقفه
+        scene2Logo.setImageResource(R.drawable.logo_w);
     }
 
     /* ═══════════════════════════════════════════════════════════
@@ -281,48 +285,12 @@ public class SplashActivity extends AppCompatActivity {
     }
 
     /* ═══════════════════════════════════════════════════════════
-       Load image from URL
-       ═══════════════════════════════════════════════════════════ */
-    @SuppressWarnings("deprecation")
-    private void loadImageFromUrl(String urlStr, ImageView target) {
-        new AsyncTask<String, Void, Bitmap>() {
-            @Override
-            protected Bitmap doInBackground(String... params) {
-                try {
-                    URL url = new URL(params[0]);
-                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                    conn.setConnectTimeout(8000);
-                    conn.setReadTimeout(8000);
-                    conn.setInstanceFollowRedirects(true);
-                    conn.connect();
-                    if (conn.getResponseCode() == 200) {
-                        try (InputStream is = conn.getInputStream()) {
-                            return BitmapFactory.decodeStream(is);
-                        }
-                    }
-                } catch (Exception ignored) {}
-                return null;
-            }
-            @Override
-            protected void onPostExecute(Bitmap bitmap) {
-                if (bitmap != null && target != null) {
-                    target.setImageBitmap(bitmap);
-                }
-            }
-        }.execute(urlStr);
-    }
-
-    /* ═══════════════════════════════════════════════════════════
-       ★ NAVIGATE — همیشه به Login (بدون چک سشن)
-       
-       چون نمی‌خواهیم توکن ذخیره شود، هر بار کاربر باید دوباره وارد شود.
-       Splash فقط برای نمایش برند است، تصمیم‌گیری امنیتی در LoginActivity.
+       ★ NAVIGATE — همیشه به Login
        ═══════════════════════════════════════════════════════════ */
     private void navigateNext() {
         if (navigated) return;
         navigated = true;
 
-        // ★ همیشه به LoginActivity
         goToLogin();
     }
 
