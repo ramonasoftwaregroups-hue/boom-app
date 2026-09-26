@@ -3,10 +3,12 @@
 
     <!-- ═══════════════ تم اصلی اپ ═══════════════ -->
     <!-- 
-      مهم: parent باید Theme.AppCompat باشه
-      چون MainActivity از AppCompatActivity ارث‌بری می‌کنه
+      مهم: parent باید Theme.MaterialComponents باشد
+      چون LoginActivity از MaterialButton, TextInputLayout, TabLayout استفاده می‌کند
+      و MainActivity از AppCompatActivity ارث‌بری می‌کند.
+      Theme.MaterialComponents خودش از AppCompat مشتق شده و هر دو را پشتیبانی می‌کند.
     -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="AppTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
         <item name="android:windowBackground">@color/backgroundColor</item>
         <item name="android:colorBackground">@color/backgroundColor</item>
         <item name="android:statusBarColor">@color/colorPrimary</item>
@@ -16,6 +18,12 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+
+        <!-- ★ رنگ‌های Material Components که به تم اضافه می‌شوند -->
+        <item name="colorOnPrimary">@android:color/white</item>
+        <item name="colorSurface">@color/backgroundColor</item>
+        <item name="colorOnSurface">@color/boomTextPrimary</item>
+        <item name="colorError">@color/boomError</item>
     </style>
 
 </resources>
