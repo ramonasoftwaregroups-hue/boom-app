@@ -1,16 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- ═══════════ رنگ‌های اصلی پلتفرم BOOM ═══════════ -->
+    <color name="boomPrimary">#007C93</color>
+    <color name="boomPrimaryDark">#00556b</color>
+    <color name="boomPrimarySoft">#14007C93</color>
 
-    <!-- Shortcut (حفظ شده) -->
-    <color name="shortcut_background">#F5F5F5</color>
+    <color name="boomBg">#F6F9FB</color>
+    <color name="boomTabBg">#EFF5F9</color>
+    <color name="boomDivider">#E2E8F0</color>
 
-    <!-- رنگ برند -->
-    <color name="colorPrimary">#007E93</color>
-    <color name="colorPrimaryDark">#00556B</color>
-    <color name="colorAccent">#00B3C9</color>
+    <color name="boomTextPrimary">#0B1220</color>
+    <color name="boomTextMuted">#64748B</color>
 
-    <!-- پس‌زمینه -->
-    <color name="backgroundColor">#FFFFFF</color>
-    <color name="navigationColor">#007E93</color>
+    <color name="boomError">#EF4444</color>
 
+    <!-- ═══════════ رنگ قبلی (نگه می‌داریم) ═══════════ -->
+    <color name="colorPrimary">#007C93</color>
 </resources>
