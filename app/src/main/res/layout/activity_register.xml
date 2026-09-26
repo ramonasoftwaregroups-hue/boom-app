@@ -22,7 +22,7 @@
             android:paddingTop="16dp"
             android:paddingBottom="20dp">
 
-            <!-- Top bar -->
+            <!-- ═══ Top bar ═══ -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -59,7 +59,7 @@
                     android:layout_marginStart="12dp"/>
             </LinearLayout>
 
-            <!-- Steps indicator -->
+            <!-- ═══ Steps indicator ═══ -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -117,7 +117,7 @@
                     android:textStyle="bold"/>
             </LinearLayout>
 
-            <!-- Error alert -->
+            <!-- ═══ Error alert ═══ -->
             <LinearLayout
                 android:id="@+id/errorAlert"
                 android:layout_width="match_parent"
@@ -134,7 +134,8 @@
                     android:layout_height="18dp"
                     android:src="@drawable/ic_error"
                     app:tint="@color/boomError"
-                    android:layout_marginEnd="10dp"/>
+                    android:layout_marginEnd="10dp"
+                    android:contentDescription="@null"/>
 
                 <TextView
                     android:id="@+id/errorText"
@@ -262,6 +263,7 @@
                     android:textStyle="bold"
                     android:textAllCaps="false"
                     android:letterSpacing="0"
+                    android:fontFamily="sans-serif-medium"
                     android:textColor="@android:color/white"
                     app:backgroundTint="@color/boomPrimary"
                     app:cornerRadius="14dp"
@@ -330,8 +332,10 @@
                         android:layout_marginEnd="4dp"
                         android:text="@string/register_prev"
                         android:textSize="14sp"
+                        android:textStyle="bold"
                         android:textAllCaps="false"
                         android:letterSpacing="0"
+                        android:fontFamily="sans-serif-medium"
                         app:strokeColor="@color/boomPrimary"
                         app:strokeWidth="1.5dp"
                         app:cornerRadius="14dp"
@@ -349,6 +353,7 @@
                         android:textStyle="bold"
                         android:textAllCaps="false"
                         android:letterSpacing="0"
+                        android:fontFamily="sans-serif-medium"
                         android:textColor="@android:color/white"
                         app:backgroundTint="@color/boomPrimary"
                         app:cornerRadius="14dp"
@@ -392,12 +397,40 @@
                     android:layoutDirection="ltr"
                     android:layout_marginBottom="18dp">
 
-                    <EditText android:id="@+id/regOtp1" style="@style/BoomOtpBox" android:layout_marginEnd="6dp"/>
-                    <EditText android:id="@+id/regOtp2" style="@style/BoomOtpBox" android:layout_marginEnd="6dp"/>
-                    <EditText android:id="@+id/regOtp3" style="@style/BoomOtpBox" android:layout_marginEnd="6dp"/>
-                    <EditText android:id="@+id/regOtp4" style="@style/BoomOtpBox" android:layout_marginEnd="6dp"/>
-                    <EditText android:id="@+id/regOtp5" style="@style/BoomOtpBox" android:layout_marginEnd="6dp"/>
-                    <EditText android:id="@+id/regOtp6" style="@style/BoomOtpBox"/>
+                    <EditText
+                        android:id="@+id/regOtp1"
+                        style="@style/BoomOtpBox"
+                        android:layout_marginEnd="6dp"
+                        android:digits="0123456789"/>
+
+                    <EditText
+                        android:id="@+id/regOtp2"
+                        style="@style/BoomOtpBox"
+                        android:layout_marginEnd="6dp"
+                        android:digits="0123456789"/>
+
+                    <EditText
+                        android:id="@+id/regOtp3"
+                        style="@style/BoomOtpBox"
+                        android:layout_marginEnd="6dp"
+                        android:digits="0123456789"/>
+
+                    <EditText
+                        android:id="@+id/regOtp4"
+                        style="@style/BoomOtpBox"
+                        android:layout_marginEnd="6dp"
+                        android:digits="0123456789"/>
+
+                    <EditText
+                        android:id="@+id/regOtp5"
+                        style="@style/BoomOtpBox"
+                        android:layout_marginEnd="6dp"
+                        android:digits="0123456789"/>
+
+                    <EditText
+                        android:id="@+id/regOtp6"
+                        style="@style/BoomOtpBox"
+                        android:digits="0123456789"/>
                 </LinearLayout>
 
                 <com.google.android.material.button.MaterialButton
@@ -410,6 +443,7 @@
                     android:textStyle="bold"
                     android:textAllCaps="false"
                     android:letterSpacing="0"
+                    android:fontFamily="sans-serif-medium"
                     android:textColor="@android:color/white"
                     app:backgroundTint="@color/boomPrimary"
                     app:cornerRadius="14dp"
