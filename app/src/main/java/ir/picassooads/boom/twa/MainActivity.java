@@ -19,15 +19,17 @@ import androidx.core.content.ContextCompat;
  * ═══════════════════════════════════════════════════════════════
  * MainActivity — WebView پلتفرم
  * 
- * v2 — اصلاحات:
- *   • چک کامل اعتبار سشن (isSessionValid) در onCreate و onResume
- *   • پاک کردن توکن منقضی قبل از رفتن به Login
+ * v3 — اصلاحات امنیتی:
+ *   • توکن از Intent دریافت می‌شود (نه از SessionManager)
+ *   • هر بار که این Activity باز می‌شود، توکن در Intent هست
+ *   • اگر توکن در Intent نبود → مستقیم به Login
+ *   • در onResume، اگر توکن در Intent گم شد، به Login برمی‌گردد
  * ═══════════════════════════════════════════════════════════════
  */
 public class MainActivity extends AppCompatActivity {
 
     private WebView webView;
-    private SessionManager session;
+    private String sessionToken = "";
 
     private static final String APP_SCHEME = "boomapp";
     private static final String BRIDGE_BASE =
@@ -38,14 +40,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        session = new SessionManager(this);
+        // ★ توکن را از Intent بگیر (نه از SessionManager)
+        sessionToken = getIntent().getStringExtra("session_token");
 
-        // ★ چک کامل: توکن هست + منقضی نشده
-        if (!session.isSessionValid()) {
-            // اگر توکن بود ولی منقضی شده، پاکش کن
-            if (session.isLoggedIn()) {
-                session.clear();
-            }
+        if (sessionToken == null || sessionToken.isEmpty()) {
+            // اگر توکن نداریم، یعنی کاربر از طریق Login نیامده → برو Login
             goToLogin();
             return;
         }
@@ -66,13 +65,15 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /* ═══════════════════════════════════════════════════════════
+       بارگذاری WebView با توکن
+       ═══════════════════════════════════════════════════════════ */
     private void loadWithToken() {
-        String token = session.getToken();
-        if (token == null || token.isEmpty()) {
+        if (sessionToken == null || sessionToken.isEmpty()) {
             goToLogin();
             return;
         }
-        String url = BRIDGE_BASE + "?token=" + Uri.encode(token);
+        String url = BRIDGE_BASE + "?token=" + Uri.encode(sessionToken);
         webView.loadUrl(url);
     }
 
@@ -120,8 +121,7 @@ public class MainActivity extends AppCompatActivity {
                                 || path.endsWith("/panel/index.php")
                                 || path.contains("/login")
                                 || path.contains("/auth/"))) {
-                        // کاربر از پنل logout کرد → سشن را پاک کن
-                        session.clear();
+                        // کاربر از پنل logout کرد → برو Login
                         goToLogin();
                         return true;
                     }
@@ -160,7 +160,12 @@ public class MainActivity extends AppCompatActivity {
         @JavascriptInterface
         public void logout() {
             runOnUiThread(() -> {
-                session.clear();
+                // توکن در Intent بوده، پس نیازی به پاک کردن SharedPreferences نیست
+                // فقط کوکی‌های WebView را پاک کن و برو Login
+                try {
+                    CookieManager.getInstance().removeAllCookies(null);
+                    CookieManager.getInstance().flush();
+                } catch (Exception ignored) {}
                 goToLogin();
             });
         }
@@ -221,6 +226,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void goToLogin() {
+        try {
+            CookieManager.getInstance().removeAllCookies(null);
+            CookieManager.getInstance().flush();
+        } catch (Exception ignored) {}
+
         Intent i = new Intent(MainActivity.this, LoginActivity.class);
         i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(i);
@@ -231,21 +241,33 @@ public class MainActivity extends AppCompatActivity {
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         setIntent(intent);
+
+        // ★ توکن جدید از Intent بگیر (اگر کاربر دوباره لاگین کرده)
+        String newToken = intent.getStringExtra("session_token");
+        if (newToken != null && !newToken.isEmpty()) {
+            sessionToken = newToken;
+        }
+
         handleIntent(intent);
     }
 
     /* ═══════════════════════════════════════════════════════════
-       ★ onResume — چک کامل اعتبار سشن
+       ★ onResume — چک توکن موجود در Intent
        ═══════════════════════════════════════════════════════════ */
     @Override
     protected void onResume() {
         super.onResume();
 
-        if (session != null && !session.isSessionValid()) {
-            // توکن منقضی یا نامعتبر شد → پاکش کن و برو Login
-            session.clear();
-            goToLogin();
-            return;
+        // ★ اگر توکن در Intent نیست (مثلاً از Stack سیستم برگشته)
+        // → به Login برگرد
+        if (sessionToken == null || sessionToken.isEmpty()) {
+            String t = getIntent().getStringExtra("session_token");
+            if (t != null && !t.isEmpty()) {
+                sessionToken = t;
+            } else {
+                goToLogin();
+                return;
+            }
         }
 
         try { CookieManager.getInstance().flush(); } catch (Exception ignored) {}
