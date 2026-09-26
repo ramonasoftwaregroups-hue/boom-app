@@ -1,6 +1,7 @@
 package ir.picassooads.boom.twa;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -19,11 +20,10 @@ import androidx.core.content.ContextCompat;
  * ═══════════════════════════════════════════════════════════════
  * MainActivity — WebView پلتفرم
  * 
- * v3 — اصلاحات امنیتی:
- *   • توکن از Intent دریافت می‌شود (نه از SessionManager)
- *   • هر بار که این Activity باز می‌شود، توکن در Intent هست
- *   • اگر توکن در Intent نبود → مستقیم به Login
- *   • در onResume، اگر توکن در Intent گم شد، به Login برمی‌گردد
+ * v4 — اصلاحات:
+ *   • attachBaseContext برای اعمال زبان روی WebView
+ *   • اعمال تم کاربر از Intent (اگر از Login آمده)
+ *   • پاک کردن کوکی‌ها هنگام logout
  * ═══════════════════════════════════════════════════════════════
  */
 public class MainActivity extends AppCompatActivity {
@@ -35,18 +35,36 @@ public class MainActivity extends AppCompatActivity {
     private static final String BRIDGE_BASE =
             "https://boom.picassooads.ir/panel/mobile-bridge.php";
 
+    /* ═══════════════════════════════════════════════════════════
+       ★ attachBaseContext — اعمال زبان
+       ═══════════════════════════════════════════════════════════ */
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        String lang = LocaleHelper.getLanguage(newBase);
+        Context ctx = LocaleHelper.applyLocale(newBase, lang);
+        super.attachBaseContext(ctx);
+    }
+
     @SuppressLint({"SetJavaScriptEnabled", "AddJavascriptInterface"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // ★ اعمال تم قبل از super
+        ThemeHelper.applySavedMode(this);
+
         super.onCreate(savedInstanceState);
 
-        // ★ توکن را از Intent بگیر (نه از SessionManager)
+        // ★ توکن را از Intent بگیر
         sessionToken = getIntent().getStringExtra("session_token");
 
         if (sessionToken == null || sessionToken.isEmpty()) {
-            // اگر توکن نداریم، یعنی کاربر از طریق Login نیامده → برو Login
             goToLogin();
             return;
+        }
+
+        // ★ اگر تم کاربر از Intent آمده، اعمال کن
+        String userTheme = getIntent().getStringExtra("user_theme");
+        if (userTheme != null && !userTheme.isEmpty()) {
+            ThemeHelper.applyMode(this, userTheme);
         }
 
         setContentView(R.layout.activity_main);
@@ -160,8 +178,6 @@ public class MainActivity extends AppCompatActivity {
         @JavascriptInterface
         public void logout() {
             runOnUiThread(() -> {
-                // توکن در Intent بوده، پس نیازی به پاک کردن SharedPreferences نیست
-                // فقط کوکی‌های WebView را پاک کن و برو Login
                 try {
                     CookieManager.getInstance().removeAllCookies(null);
                     CookieManager.getInstance().flush();
@@ -242,24 +258,25 @@ public class MainActivity extends AppCompatActivity {
         super.onNewIntent(intent);
         setIntent(intent);
 
-        // ★ توکن جدید از Intent بگیر (اگر کاربر دوباره لاگین کرده)
+        // ★ توکن جدید از Intent بگیر
         String newToken = intent.getStringExtra("session_token");
         if (newToken != null && !newToken.isEmpty()) {
             sessionToken = newToken;
         }
 
+        // ★ تم جدید اگر آمده
+        String newTheme = intent.getStringExtra("user_theme");
+        if (newTheme != null && !newTheme.isEmpty()) {
+            ThemeHelper.applyMode(this, newTheme);
+        }
+
         handleIntent(intent);
     }
 
-    /* ═══════════════════════════════════════════════════════════
-       ★ onResume — چک توکن موجود در Intent
-       ═══════════════════════════════════════════════════════════ */
     @Override
     protected void onResume() {
         super.onResume();
 
-        // ★ اگر توکن در Intent نیست (مثلاً از Stack سیستم برگشته)
-        // → به Login برگرد
         if (sessionToken == null || sessionToken.isEmpty()) {
             String t = getIntent().getStringExtra("session_token");
             if (t != null && !t.isEmpty()) {
