@@ -8,9 +8,7 @@
     android:background="@color/boomBg"
     tools:context=".LoginActivity">
 
-    <!-- ═══════════════════════════════════════════════════════════
-         BACKGROUND LIGHTS
-         ═══════════════════════════════════════════════════════════ -->
+    <!-- BACKGROUND LIGHTS -->
     <ImageView
         android:id="@+id/bgLight1"
         android:layout_width="320dp"
@@ -43,9 +41,7 @@
         android:contentDescription="@null"
         android:alpha="0.6"/>
 
-    <!-- ═══════════════════════════════════════════════════════════
-         MAIN CONTENT
-         ═══════════════════════════════════════════════════════════ -->
+    <!-- MAIN CONTENT -->
     <ScrollView
         android:id="@+id/loginScroll"
         android:layout_width="match_parent"
@@ -63,9 +59,7 @@
             android:paddingTop="4dp"
             android:paddingBottom="20dp">
 
-            <!-- ═══════════════════════════════════════════
-                 TOP ACTIONS
-                 ═══════════════════════════════════════════ -->
+            <!-- TOP ACTIONS -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -118,9 +112,7 @@
                 </FrameLayout>
             </LinearLayout>
 
-            <!-- ═══════════════════════════════════════════
-                 BRAND
-                 ═══════════════════════════════════════════ -->
+            <!-- BRAND -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -143,12 +135,12 @@
                         android:alpha="0.4"
                         android:contentDescription="@null"/>
 
+                    <!-- ★ src حذف شد — لوگو از URL در LoginActivity لود می‌شود -->
                     <ImageView
                         android:id="@+id/brandLogo"
                         android:layout_width="64dp"
                         android:layout_height="64dp"
                         android:layout_gravity="center"
-                        android:src="@mipmap/ic_launcher"
                         android:contentDescription="@string/brand_name"
                         android:scaleType="fitCenter"/>
                 </FrameLayout>
@@ -173,9 +165,7 @@
                     android:textSize="12.5sp"/>
             </LinearLayout>
 
-            <!-- ═══════════════════════════════════════════
-                 TABS
-                 ═══════════════════════════════════════════ -->
+            <!-- TABS -->
             <com.google.android.material.tabs.TabLayout
                 android:id="@+id/loginTabs"
                 android:layout_width="match_parent"
@@ -203,9 +193,7 @@
                     android:text="@string/login_tab_otp"/>
             </com.google.android.material.tabs.TabLayout>
 
-            <!-- ═══════════════════════════════════════════
-                 ERROR ALERT
-                 ═══════════════════════════════════════════ -->
+            <!-- ERROR ALERT -->
             <LinearLayout
                 android:id="@+id/errorAlert"
                 android:layout_width="match_parent"
@@ -239,9 +227,7 @@
                     tools:text="نام کاربری یا رمز عبور اشتباه است"/>
             </LinearLayout>
 
-            <!-- ═══════════════════════════════════════════
-                 PASSWORD MODE
-                 ═══════════════════════════════════════════ -->
+            <!-- PASSWORD MODE -->
             <LinearLayout
                 android:id="@+id/passwordMode"
                 android:layout_width="match_parent"
@@ -372,9 +358,7 @@
                     app:rippleColor="@color/boomPrimarySoft"/>
             </LinearLayout>
 
-            <!-- ═══════════════════════════════════════════
-                 OTP MODE
-                 ═══════════════════════════════════════════ -->
+            <!-- OTP MODE -->
             <LinearLayout
                 android:id="@+id/otpMode"
                 android:layout_width="match_parent"
@@ -441,31 +425,37 @@
                     <EditText
                         android:id="@+id/otp1"
                         style="@style/BoomOtpBox"
-                        android:layout_marginEnd="6dp"/>
+                        android:layout_marginEnd="6dp"
+                        android:digits="0123456789"/>
 
                     <EditText
                         android:id="@+id/otp2"
                         style="@style/BoomOtpBox"
-                        android:layout_marginEnd="6dp"/>
+                        android:layout_marginEnd="6dp"
+                        android:digits="0123456789"/>
 
                     <EditText
                         android:id="@+id/otp3"
                         style="@style/BoomOtpBox"
-                        android:layout_marginEnd="6dp"/>
+                        android:layout_marginEnd="6dp"
+                        android:digits="0123456789"/>
 
                     <EditText
                         android:id="@+id/otp4"
                         style="@style/BoomOtpBox"
-                        android:layout_marginEnd="6dp"/>
+                        android:layout_marginEnd="6dp"
+                        android:digits="0123456789"/>
 
                     <EditText
                         android:id="@+id/otp5"
                         style="@style/BoomOtpBox"
-                        android:layout_marginEnd="6dp"/>
+                        android:layout_marginEnd="6dp"
+                        android:digits="0123456789"/>
 
                     <EditText
                         android:id="@+id/otp6"
-                        style="@style/BoomOtpBox"/>
+                        style="@style/BoomOtpBox"
+                        android:digits="0123456789"/>
                 </LinearLayout>
 
                 <com.google.android.material.button.MaterialButton
@@ -528,9 +518,7 @@
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- ═══════════════════════════════════════════
-                 REGISTER CTA
-                 ═══════════════════════════════════════════ -->
+            <!-- REGISTER CTA -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/registerCta"
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
@@ -553,9 +541,7 @@
                 app:iconSize="18dp"
                 android:textColor="@color/boomPrimary"/>
 
-            <!-- ═══════════════════════════════════════════
-                 FOOTER — Picasso
-                 ═══════════════════════════════════════════ -->
+            <!-- FOOTER -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
