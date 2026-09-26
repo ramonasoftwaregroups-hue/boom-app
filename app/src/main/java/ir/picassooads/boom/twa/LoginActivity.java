@@ -1,6 +1,13 @@
 package ir.picassooads.boom.twa;
 
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.text.Editable;
@@ -15,7 +22,11 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.biometric.BiometricManager;
+import androidx.biometric.BiometricPrompt;
+import androidx.core.content.ContextCompat;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.tabs.TabLayout;
@@ -24,20 +35,28 @@ import com.google.android.material.textfield.TextInputLayout;
 
 import org.json.JSONObject;
 
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.concurrent.Executor;
+
 /**
  * ═══════════════════════════════════════════════════════════════
  * LoginActivity — صفحه‌ی ورود نیتیو
  * 
- * v4 — اصلاحات امنیتی:
- *   • توکن دستگاه دیگر در SharedPreferences ذخیره نمی‌شود
- *   • هر بار که این صفحه باز می‌شود، همه‌ی کوکی‌های WebView پاک می‌شوند
- *   • توکن فقط از طریق Intent به MainActivity منتقل می‌شود
- *   • نتیجه: هر بار کاربر باید دوباره وارد شود (طبق خواسته‌ی کارفرما)
+ * v5 — اصلاحات کامل:
+ *   • زبان: با attachBaseContext اعمال می‌شود (کل اپ)
+ *   • لوگو: از URL با فیلتر سفید (بدون فریم ic_launcher)
+ *   • بیومتریک: BiometricPrompt نیتیو (اثر انگشت/چهره)
+ *   • تم و زبان کاربر از سرور: بعد از login اعمال می‌شود
  * ═══════════════════════════════════════════════════════════════
  */
 public class LoginActivity extends AppCompatActivity {
 
     private static final String TAG = "LoginActivity";
+
+    private static final String BOOM_LOGO_URL =
+            "https://boom.picassooads.ir/assets/images/boom.png";
 
     private static final String PICASSO_FOOTER_URL =
             "https://boom.picassooads.ir/assets/images/logo_motion.gif";
@@ -50,8 +69,7 @@ public class LoginActivity extends AppCompatActivity {
     private MaterialButton loginBtn, verifyOtpBtn, resendBtn, backBtn, forgotBtn, registerCta;
     private TextView errorText, otpSub, langCode;
     private FrameLayout themeBtn, langBtn, biometricBtn;
-    private ImageView themeIcon;
-    private ImageView picassoLogo;
+    private ImageView themeIcon, brandLogo, picassoLogo;
     private EditText[] otpBoxes = new EditText[6];
 
     /* State */
@@ -62,6 +80,22 @@ public class LoginActivity extends AppCompatActivity {
     private boolean otpSent = false;
     private CountDownTimer resendTimer;
 
+    /* Biometric */
+    private BiometricPrompt biometricPrompt;
+    private BiometricPrompt.PromptInfo biometricPromptInfo;
+
+    /* ═══════════════════════════════════════════════════════════
+       ★ attachBaseContext — اعمال زبان روی کل Activity
+       این متد قبل از onCreate صدا زده می‌شود و زبان را
+       روی همه‌ی منابع اعمال می‌کند.
+       ═══════════════════════════════════════════════════════════ */
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        String lang = LocaleHelper.getLanguage(newBase);
+        Context ctx = LocaleHelper.applyLocale(newBase, lang);
+        super.attachBaseContext(ctx);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         // ★ اعمال تم قبل از super
@@ -69,18 +103,16 @@ public class LoginActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
 
-        // ★ اعمال زبان
+        // ★ زبان فعلی
         currentLang = LocaleHelper.getLanguage(this);
-        LocaleHelper.applyLocale(this, currentLang);
 
-        // ★ سشن قبلی را پاک کن (توکن ذخیره نمی‌شود، ولی برای اطمینان)
+        // ★ سشن قبلی را پاک کن
         session = new SessionManager(this);
         if (session.isLoggedIn()) {
             session.clear();
         }
 
         // ★ کوکی‌های WebView را پاک کن
-        // چون کاربر هر بار باید لاگین کند، سشن PHP قبلی هم باید پاک شود
         try {
             CookieManager.getInstance().removeAllCookies(null);
             CookieManager.getInstance().flush();
@@ -98,6 +130,7 @@ public class LoginActivity extends AppCompatActivity {
         setupFields();
         setupButtons();
         setupOtpBoxes();
+        setupBiometric();
 
         // اعمال فونت
         LocaleHelper.applyFontToViewTree(this,
@@ -109,10 +142,13 @@ public class LoginActivity extends AppCompatActivity {
         // به‌روزرسانی آیکون تم
         updateThemeIcon();
 
+        // ★ لود لوگوی BOOM در هدر (سفیدشده — بدون فریم)
+        loadBrandLogo();
+
         // ★ لود لوگوی Picasso در فوتر
         loadPicassoFooter();
 
-        // ★ اگر username قبلی ذخیره شده، پر کن (اختیاری — برای راحتی)
+        // ★ پر کردن username قبلی
         restoreSavedUsername();
     }
 
@@ -141,6 +177,7 @@ public class LoginActivity extends AppCompatActivity {
         biometricBtn = findViewById(R.id.biometricBtn);
         themeIcon = findViewById(R.id.themeIcon);
         langCode = findViewById(R.id.langCode);
+        brandLogo = findViewById(R.id.brandLogo);
         picassoLogo = findViewById(R.id.picassoLogo);
 
         otpBoxes[0] = findViewById(R.id.otp1);
@@ -156,6 +193,7 @@ public class LoginActivity extends AppCompatActivity {
        ═══════════════════════════════════════════════════════════ */
     private void setupTopActions() {
         themeBtn.setOnClickListener(v -> {
+            // ★ تغییر تم + recreate فوری
             ThemeHelper.toggleLightDark(this);
             updateThemeIcon();
         });
@@ -168,6 +206,9 @@ public class LoginActivity extends AppCompatActivity {
         themeIcon.setImageResource(dark ? R.drawable.ic_sun : R.drawable.ic_moon);
     }
 
+    /* ═══════════════════════════════════════════════════════════
+       ★ showLanguageDialog — تغییر زبان با forceLocale
+       ═══════════════════════════════════════════════════════════ */
     private void showLanguageDialog() {
         final String[] names = {
                 "فارسی", "العربية", "English", "Français", "Italiano", "Deutsch"
@@ -180,10 +221,106 @@ public class LoginActivity extends AppCompatActivity {
                 .setItems(names, (dialog, which) -> {
                     String lang = codes[which];
                     if (lang.equals(currentLang)) return;
+
+                    // ★ ذخیره
                     LocaleHelper.saveLanguage(this, lang);
+
+                    // ★ اعمال فوری روی منابع
+                    LocaleHelper.forceLocale(this, lang);
+
+                    // ★ بازسازی Activity با زبان جدید
                     recreate();
                 })
                 .show();
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       BIOMETRIC — BiometricPrompt نیتیو
+       ═══════════════════════════════════════════════════════════ */
+    private void setupBiometric() {
+        Executor executor = ContextCompat.getMainExecutor(this);
+
+        biometricPrompt = new BiometricPrompt(this, executor,
+                new BiometricPrompt.AuthenticationCallback() {
+                    @Override
+                    public void onAuthenticationError(int errorCode, @NonNull CharSequence errString) {
+                        super.onAuthenticationError(errorCode, errString);
+                        Log.w(TAG, "Biometric error " + errorCode + ": " + errString);
+                        if (errorCode == BiometricPrompt.ERROR_USER_CANCELED
+                                || errorCode == BiometricPrompt.ERROR_NEGATIVE_BUTTON
+                                || errorCode == BiometricPrompt.ERROR_CANCELED) {
+                            // کاربر لغو کرد — ساکت بمان
+                            return;
+                        }
+                        Toast.makeText(LoginActivity.this,
+                                errString, Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onAuthenticationSucceeded(@NonNull BiometricPrompt.AuthenticationResult result) {
+                        super.onAuthenticationSucceeded(result);
+                        Log.d(TAG, "Biometric auth succeeded");
+                        onBiometricSuccess();
+                    }
+
+                    @Override
+                    public void onAuthenticationFailed() {
+                        super.onAuthenticationFailed();
+                        Log.d(TAG, "Biometric auth failed (retry)");
+                    }
+                });
+    }
+
+    private void onBiometric() {
+        // ★ چک پشتیبانی دستگاه
+        BiometricManager bm = BiometricManager.from(this);
+        int canAuth = bm.canAuthenticate(
+                BiometricManager.Authenticators.BIOMETRIC_STRONG
+                        | BiometricManager.Authenticators.BIOMETRIC_WEAK);
+
+        if (canAuth != BiometricManager.BIOMETRIC_SUCCESS) {
+            String msg;
+            switch (canAuth) {
+                case BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE:
+                    msg = getString(R.string.biometric_not_available);
+                    break;
+                case BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE:
+                    msg = getString(R.string.biometric_error);
+                    break;
+                case BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED:
+                    msg = getString(R.string.biometric_not_enrolled);
+                    break;
+                default:
+                    msg = getString(R.string.biometric_not_available);
+            }
+            Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        // ★ نمایش prompt
+        biometricPromptInfo = new BiometricPrompt.PromptInfo.Builder()
+                .setTitle(getString(R.string.biometric_title))
+                .setSubtitle(getString(R.string.biometric_subtitle))
+                .setDescription(getString(R.string.biometric_description))
+                .setNegativeButtonText(getString(R.string.biometric_cancel))
+                .setAllowedAuthenticators(
+                        BiometricManager.Authenticators.BIOMETRIC_STRONG
+                                | BiometricManager.Authenticators.BIOMETRIC_WEAK)
+                .setConfirmationRequired(false)
+                .build();
+
+        try {
+            biometricPrompt.authenticate(biometricPromptInfo);
+        } catch (Exception e) {
+            Log.e(TAG, "authenticate failed", e);
+            Toast.makeText(this, R.string.biometric_error, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void onBiometricSuccess() {
+        // ★ در نسخه‌ی فعلی: فقط اطلاع می‌دهیم
+        // در نسخه‌ی بعد، باید توکن را از سرور با یک endpoint مخصوص بیومتریک بگیریم
+        Toast.makeText(this, R.string.biometric_not_available, Toast.LENGTH_SHORT).show();
     }
 
     /* ═══════════════════════════════════════════════════════════
@@ -210,7 +347,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     /* ═══════════════════════════════════════════════════════════
-       FIELDS — realtime error clear
+       FIELDS
        ═══════════════════════════════════════════════════════════ */
     private void setupFields() {
         TextWatcher clearError = new TextWatcher() {
@@ -430,10 +567,9 @@ public class LoginActivity extends AppCompatActivity {
     /* ═══════════════════════════════════════════════════════════
        ★ LOGIN SUCCESS
        
-       - توکن در SharedPreferences ذخیره نمی‌شود
-       - فقط username برای راحتی کاربر ذخیره می‌شود
-       - توکن از طریق Intent به MainActivity پاس می‌شود
-       - زبان و تم کاربر ذخیره می‌شوند (چون تجربه‌ی کاربر بهتر می‌شود)
+       - توکن ذخیره نمی‌شود (فقط در Intent)
+       - ★ زبان و تم از سرور اعمال می‌شوند
+       - username برای auto-fill ذخیره می‌شود
        ═══════════════════════════════════════════════════════════ */
     private void handleLoginSuccess(JSONObject response) {
         try {
@@ -453,14 +589,23 @@ public class LoginActivity extends AppCompatActivity {
             String fullName = user.optString("full_name", "");
             String phone = user.optString("phone", "");
             String email = user.optString("email", "");
+
+            // ★ زبان و تم کاربر از سرور
             String lang = user.optString("language", currentLang);
             String theme = user.optString("theme", "auto");
 
-            // ★ فقط تنظیمات پایه را ذخیره می‌کنیم — نه توکن!
-            if (LocaleHelper.isValid(lang)) LocaleHelper.saveLanguage(this, lang);
-            if (theme != null) ThemeHelper.saveMode(this, theme);
+            // ★ اعمال زبان کاربر
+            if (LocaleHelper.isValid(lang)) {
+                LocaleHelper.saveLanguage(this, lang);
+                LocaleHelper.forceLocale(this, lang);
+            }
 
-            // ★ ذخیره‌ی username برای پر شدن خودکار در ورود بعدی (اختیاری)
+            // ★ اعمال تم کاربر
+            if (theme != null && !theme.isEmpty()) {
+                ThemeHelper.saveUserTheme(this, theme);
+            }
+
+            // ★ ذخیره‌ی username برای ورود بعدی
             if (!username.isEmpty()) {
                 try {
                     getSharedPreferences("boom_prefs", MODE_PRIVATE)
@@ -470,17 +615,17 @@ public class LoginActivity extends AppCompatActivity {
                 } catch (Exception ignored) {}
             }
 
-            // ★★ نکته مهم: دیگر session.saveSession صدا زده نمی‌شود
-
             Toast.makeText(this,
                     getString(R.string.success_welcome) + " " + fullName,
                     Toast.LENGTH_SHORT).show();
 
-            // ★ توکن را از طریق Intent به MainActivity بفرست
+            // ★ توکن از طریق Intent به MainActivity
             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
             intent.putExtra("session_token", token);
             intent.putExtra("user_id", userId);
             intent.putExtra("user_full_name", fullName);
+            intent.putExtra("user_language", lang);
+            intent.putExtra("user_theme", theme);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
             finish();
@@ -492,7 +637,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     /* ═══════════════════════════════════════════════════════════
-       ★ RESTORE SAVED USERNAME
+       RESTORE SAVED USERNAME
        ═══════════════════════════════════════════════════════════ */
     private void restoreSavedUsername() {
         try {
@@ -500,7 +645,6 @@ public class LoginActivity extends AppCompatActivity {
                     .getString("last_username", "");
             if (lastUsername != null && !lastUsername.isEmpty() && loginInput != null) {
                 loginInput.setText(lastUsername);
-                // cursor به آخر
                 if (loginInput.getText() != null) {
                     loginInput.setSelection(loginInput.getText().length());
                 }
@@ -509,10 +653,42 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     /* ═══════════════════════════════════════════════════════════
-       BIOMETRIC
+       ★ LOAD BRAND LOGO — از URL با فیلتر سفید
        ═══════════════════════════════════════════════════════════ */
-    private void onBiometric() {
-        Toast.makeText(this, R.string.biometric_not_available, Toast.LENGTH_SHORT).show();
+    private void loadBrandLogo() {
+        if (brandLogo == null) return;
+
+        // فیلتر سفید — مثل filter: brightness(0) invert(1) در CSS
+        brandLogo.setColorFilter(
+                new PorterDuffColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN));
+
+        new AsyncTask<Void, Void, Bitmap>() {
+            @Override
+            protected Bitmap doInBackground(Void... voids) {
+                try {
+                    URL url = new URL(BOOM_LOGO_URL);
+                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                    conn.setConnectTimeout(8000);
+                    conn.setReadTimeout(8000);
+                    conn.setInstanceFollowRedirects(true);
+                    conn.connect();
+                    if (conn.getResponseCode() == 200) {
+                        try (InputStream is = conn.getInputStream()) {
+                            return BitmapFactory.decodeStream(is);
+                        }
+                    }
+                } catch (Exception e) {
+                    Log.w(TAG, "brand logo load failed", e);
+                }
+                return null;
+            }
+            @Override
+            protected void onPostExecute(Bitmap bm) {
+                if (bm != null && brandLogo != null) {
+                    brandLogo.setImageBitmap(bm);
+                }
+            }
+        }.execute();
     }
 
     /* ═══════════════════════════════════════════════════════════
@@ -523,18 +699,16 @@ public class LoginActivity extends AppCompatActivity {
 
         new Thread(() -> {
             try {
-                java.net.URL url = new java.net.URL(PICASSO_FOOTER_URL);
-                java.net.HttpURLConnection conn =
-                        (java.net.HttpURLConnection) url.openConnection();
+                URL url = new URL(PICASSO_FOOTER_URL);
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setConnectTimeout(5000);
                 conn.setReadTimeout(5000);
                 conn.setInstanceFollowRedirects(true);
                 conn.connect();
 
                 if (conn.getResponseCode() == 200) {
-                    try (java.io.InputStream is = conn.getInputStream()) {
-                        final android.graphics.Bitmap bm =
-                                android.graphics.BitmapFactory.decodeStream(is);
+                    try (InputStream is = conn.getInputStream()) {
+                        final Bitmap bm = BitmapFactory.decodeStream(is);
                         if (bm != null) {
                             runOnUiThread(() -> picassoLogo.setImageBitmap(bm));
                         }
