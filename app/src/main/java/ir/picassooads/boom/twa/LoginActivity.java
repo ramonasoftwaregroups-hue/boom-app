@@ -2,12 +2,9 @@ package ir.picassooads.boom.twa;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.text.Editable;
@@ -35,31 +32,22 @@ import com.google.android.material.textfield.TextInputLayout;
 
 import org.json.JSONObject;
 
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.concurrent.Executor;
 
 /**
  * ═══════════════════════════════════════════════════════════════
  * LoginActivity — صفحه‌ی ورود نیتیو
  * 
- * v5 — اصلاحات کامل:
- *   • زبان: با attachBaseContext اعمال می‌شود (کل اپ)
- *   • لوگو: از URL با فیلتر سفید (بدون فریم ic_launcher)
- *   • بیومتریک: BiometricPrompt نیتیو (اثر انگشت/چهره)
- *   • تم و زبان کاربر از سرور: بعد از login اعمال می‌شود
+ * v6 — اصلاحات:
+ *   • لوگوی BOOM از drawable محلی (بدون وقفه)
+ *   • لوگوی BOOM فقط در دارک مود سفید می‌شود (در لایت مود رنگی می‌ماند)
+ *   • لوگوی Picasso در فوتر از drawable محلی
+ *   • پیام بیومتریک موفق اصلاح شد
  * ═══════════════════════════════════════════════════════════════
  */
 public class LoginActivity extends AppCompatActivity {
 
     private static final String TAG = "LoginActivity";
-
-    private static final String BOOM_LOGO_URL =
-            "https://boom.picassooads.ir/assets/images/boom.png";
-
-    private static final String PICASSO_FOOTER_URL =
-            "https://boom.picassooads.ir/assets/images/logo_motion.gif";
 
     /* Views */
     private TabLayout loginTabs;
@@ -85,9 +73,7 @@ public class LoginActivity extends AppCompatActivity {
     private BiometricPrompt.PromptInfo biometricPromptInfo;
 
     /* ═══════════════════════════════════════════════════════════
-       ★ attachBaseContext — اعمال زبان روی کل Activity
-       این متد قبل از onCreate صدا زده می‌شود و زبان را
-       روی همه‌ی منابع اعمال می‌کند.
+       attachBaseContext — اعمال زبان روی کل Activity
        ═══════════════════════════════════════════════════════════ */
     @Override
     protected void attachBaseContext(Context newBase) {
@@ -142,10 +128,10 @@ public class LoginActivity extends AppCompatActivity {
         // به‌روزرسانی آیکون تم
         updateThemeIcon();
 
-        // ★ لود لوگوی BOOM در هدر (سفیدشده — بدون فریم)
+        // ★ لود لوگوی BOOM از drawable (با چک تم)
         loadBrandLogo();
 
-        // ★ لود لوگوی Picasso در فوتر
+        // ★ لود لوگوی Picasso در فوتر از drawable
         loadPicassoFooter();
 
         // ★ پر کردن username قبلی
@@ -207,7 +193,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     /* ═══════════════════════════════════════════════════════════
-       ★ showLanguageDialog — تغییر زبان با forceLocale
+       showLanguageDialog — تغییر زبان با forceLocale
        ═══════════════════════════════════════════════════════════ */
     private void showLanguageDialog() {
         final String[] names = {
@@ -222,13 +208,8 @@ public class LoginActivity extends AppCompatActivity {
                     String lang = codes[which];
                     if (lang.equals(currentLang)) return;
 
-                    // ★ ذخیره
                     LocaleHelper.saveLanguage(this, lang);
-
-                    // ★ اعمال فوری روی منابع
                     LocaleHelper.forceLocale(this, lang);
-
-                    // ★ بازسازی Activity با زبان جدید
                     recreate();
                 })
                 .show();
@@ -249,7 +230,6 @@ public class LoginActivity extends AppCompatActivity {
                         if (errorCode == BiometricPrompt.ERROR_USER_CANCELED
                                 || errorCode == BiometricPrompt.ERROR_NEGATIVE_BUTTON
                                 || errorCode == BiometricPrompt.ERROR_CANCELED) {
-                            // کاربر لغو کرد — ساکت بمان
                             return;
                         }
                         Toast.makeText(LoginActivity.this,
@@ -272,7 +252,6 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void onBiometric() {
-        // ★ چک پشتیبانی دستگاه
         BiometricManager bm = BiometricManager.from(this);
         int canAuth = bm.canAuthenticate(
                 BiometricManager.Authenticators.BIOMETRIC_STRONG
@@ -297,7 +276,6 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
-        // ★ نمایش prompt
         biometricPromptInfo = new BiometricPrompt.PromptInfo.Builder()
                 .setTitle(getString(R.string.biometric_title))
                 .setSubtitle(getString(R.string.biometric_subtitle))
@@ -317,10 +295,20 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
+    /* ═══════════════════════════════════════════════════════════
+       ★ BIOMETRIC SUCCESS — پیام درست
+       
+       فعلاً فقط پیام موفقیت نشان می‌دهد.
+       در مرحله‌ی بعد، با سرور یک endpoint بیومتریک می‌سازیم.
+       ═══════════════════════════════════════════════════════════ */
     private void onBiometricSuccess() {
-        // ★ در نسخه‌ی فعلی: فقط اطلاع می‌دهیم
-        // در نسخه‌ی بعد، باید توکن را از سرور با یک endpoint مخصوص بیومتریک بگیریم
-        Toast.makeText(this, R.string.biometric_not_available, Toast.LENGTH_SHORT).show();
+        // ★ پیام موفقیت
+        Toast.makeText(this,
+                getString(R.string.biometric_title) + " ✓",
+                Toast.LENGTH_SHORT).show();
+
+        // ★ فعلاً کاربر را وارد نمی‌کنیم چون endpoint بیومتریک نداریم
+        // در مرحله‌ی بعد، توکن را از سرور با device_id می‌گیریم
     }
 
     /* ═══════════════════════════════════════════════════════════
@@ -565,11 +553,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     /* ═══════════════════════════════════════════════════════════
-       ★ LOGIN SUCCESS
-       
-       - توکن ذخیره نمی‌شود (فقط در Intent)
-       - ★ زبان و تم از سرور اعمال می‌شوند
-       - username برای auto-fill ذخیره می‌شود
+       LOGIN SUCCESS
        ═══════════════════════════════════════════════════════════ */
     private void handleLoginSuccess(JSONObject response) {
         try {
@@ -590,22 +574,18 @@ public class LoginActivity extends AppCompatActivity {
             String phone = user.optString("phone", "");
             String email = user.optString("email", "");
 
-            // ★ زبان و تم کاربر از سرور
             String lang = user.optString("language", currentLang);
             String theme = user.optString("theme", "auto");
 
-            // ★ اعمال زبان کاربر
             if (LocaleHelper.isValid(lang)) {
                 LocaleHelper.saveLanguage(this, lang);
                 LocaleHelper.forceLocale(this, lang);
             }
 
-            // ★ اعمال تم کاربر
             if (theme != null && !theme.isEmpty()) {
                 ThemeHelper.saveUserTheme(this, theme);
             }
 
-            // ★ ذخیره‌ی username برای ورود بعدی
             if (!username.isEmpty()) {
                 try {
                     getSharedPreferences("boom_prefs", MODE_PRIVATE)
@@ -619,7 +599,6 @@ public class LoginActivity extends AppCompatActivity {
                     getString(R.string.success_welcome) + " " + fullName,
                     Toast.LENGTH_SHORT).show();
 
-            // ★ توکن از طریق Intent به MainActivity
             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
             intent.putExtra("session_token", token);
             intent.putExtra("user_id", userId);
@@ -653,72 +632,37 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     /* ═══════════════════════════════════════════════════════════
-       ★ LOAD BRAND LOGO — از URL با فیلتر سفید
+       ★ LOAD BRAND LOGO از drawable محلی
+       
+       ★ نکته: در لایت مود لوگو رنگی می‌ماند، در دارک مود سفید می‌شود
        ═══════════════════════════════════════════════════════════ */
     private void loadBrandLogo() {
         if (brandLogo == null) return;
 
-        // فیلتر سفید — مثل filter: brightness(0) invert(1) در CSS
-        brandLogo.setColorFilter(
-                new PorterDuffColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN));
+        // ★ چک تم فعلی
+        boolean isDark = ThemeHelper.isDark(this);
 
-        new AsyncTask<Void, Void, Bitmap>() {
-            @Override
-            protected Bitmap doInBackground(Void... voids) {
-                try {
-                    URL url = new URL(BOOM_LOGO_URL);
-                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                    conn.setConnectTimeout(8000);
-                    conn.setReadTimeout(8000);
-                    conn.setInstanceFollowRedirects(true);
-                    conn.connect();
-                    if (conn.getResponseCode() == 200) {
-                        try (InputStream is = conn.getInputStream()) {
-                            return BitmapFactory.decodeStream(is);
-                        }
-                    }
-                } catch (Exception e) {
-                    Log.w(TAG, "brand logo load failed", e);
-                }
-                return null;
-            }
-            @Override
-            protected void onPostExecute(Bitmap bm) {
-                if (bm != null && brandLogo != null) {
-                    brandLogo.setImageBitmap(bm);
-                }
-            }
-        }.execute();
+        if (isDark) {
+            // در دارک مود → سفید کن
+            brandLogo.setColorFilter(
+                    new PorterDuffColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN));
+        } else {
+            // در لایت مود → رنگی (بدون فیلتر)
+            brandLogo.clearColorFilter();
+        }
+
+        // ★ لود از drawable — بدون وقفه
+        brandLogo.setImageResource(R.drawable.boom);
     }
 
     /* ═══════════════════════════════════════════════════════════
-       LOAD PICASSO FOOTER
+       ★ LOAD PICASSO FOOTER از drawable محلی
        ═══════════════════════════════════════════════════════════ */
     private void loadPicassoFooter() {
         if (picassoLogo == null) return;
 
-        new Thread(() -> {
-            try {
-                URL url = new URL(PICASSO_FOOTER_URL);
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setConnectTimeout(5000);
-                conn.setReadTimeout(5000);
-                conn.setInstanceFollowRedirects(true);
-                conn.connect();
-
-                if (conn.getResponseCode() == 200) {
-                    try (InputStream is = conn.getInputStream()) {
-                        final Bitmap bm = BitmapFactory.decodeStream(is);
-                        if (bm != null) {
-                            runOnUiThread(() -> picassoLogo.setImageBitmap(bm));
-                        }
-                    }
-                }
-                conn.disconnect();
-            } catch (Exception e) {
-                Log.w(TAG, "picasso footer load failed", e);
-            }
-        }).start();
+        // ★ لود از drawable — بدون وقفه
+        picassoLogo.setImageResource(R.drawable.logo_motion);
     }
 
     /* ═══════════════════════════════════════════════════════════
