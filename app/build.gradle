@@ -88,4 +88,10 @@ dependencies {
 
     // ⚠️ نسخه 1.5.0 خالص Java هست - تضاد Kotlin نداره
     implementation 'androidx.browser:browser:1.5.0'
+
+    // ═══════════════════════════════════════════════════════════
+    // ★ جدید: Material Components
+    // برای TextInputLayout، MaterialButton، TabLayout
+    // ═══════════════════════════════════════════════════════════
+    implementation 'com.google.android.material:material:1.11.0'
 }
