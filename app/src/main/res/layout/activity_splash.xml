@@ -26,12 +26,12 @@
                 android:background="@drawable/splash_glow"
                 android:alpha="0"/>
 
+            <!-- ★ android:src حذف شد — در کد از URL لود می‌شود -->
             <ImageView
                 android:id="@+id/scene1Logo"
                 android:layout_width="140dp"
                 android:layout_height="140dp"
                 android:layout_gravity="center"
-                android:src="@mipmap/ic_launcher"
                 android:contentDescription="@string/splash_logo_boom"
                 android:scaleType="fitCenter"/>
         </FrameLayout>
