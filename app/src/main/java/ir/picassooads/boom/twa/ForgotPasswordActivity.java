@@ -1,5 +1,6 @@
 package ir.picassooads.boom.twa;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -18,6 +19,15 @@ import com.google.android.material.textfield.TextInputLayout;
 
 import org.json.JSONObject;
 
+/**
+ * ═══════════════════════════════════════════════════════════════
+ * ForgotPasswordActivity — بازیابی رمز عبور
+ * 
+ * v2 — اصلاحات:
+ *   • attachBaseContext برای اعمال زبان روی کل Activity
+ *   • حذف LocaleHelper.applyLocale از onCreate (به attachBaseContext منتقل شد)
+ * ═══════════════════════════════════════════════════════════════
+ */
 public class ForgotPasswordActivity extends AppCompatActivity {
 
     private FrameLayout backBtn;
@@ -33,13 +43,24 @@ public class ForgotPasswordActivity extends AppCompatActivity {
     private String currentOtpToken = "";
     private String currentResetToken = "";
 
+    /* ═══════════════════════════════════════════════════════════
+       ★ attachBaseContext — اعمال زبان روی کل Activity
+       ═══════════════════════════════════════════════════════════ */
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        String lang = LocaleHelper.getLanguage(newBase);
+        Context ctx = LocaleHelper.applyLocale(newBase, lang);
+        super.attachBaseContext(ctx);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // ★ اعمال تم قبل از super
         ThemeHelper.applySavedMode(this);
+
         super.onCreate(savedInstanceState);
 
         String lang = LocaleHelper.getLanguage(this);
-        LocaleHelper.applyLocale(this, lang);
 
         setContentView(R.layout.activity_forgot_password);
         api = new ApiClient(this);
