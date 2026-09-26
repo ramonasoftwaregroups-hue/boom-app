@@ -7,6 +7,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
+import android.webkit.CookieManager;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -15,7 +16,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.tabs.TabLayout;
@@ -28,10 +28,11 @@ import org.json.JSONObject;
  * ═══════════════════════════════════════════════════════════════
  * LoginActivity — صفحه‌ی ورود نیتیو
  * 
- * v3 — اصلاحات:
- *   • چک کامل اعتبار سشن با isSessionValid() به جای isLoggedIn()
- *   • پاک کردن سشن منقضی در onCreate
- *   • لود لوگوی Picasso در فوتر
+ * v4 — اصلاحات امنیتی:
+ *   • توکن دستگاه دیگر در SharedPreferences ذخیره نمی‌شود
+ *   • هر بار که این صفحه باز می‌شود، همه‌ی کوکی‌های WebView پاک می‌شوند
+ *   • توکن فقط از طریق Intent به MainActivity منتقل می‌شود
+ *   • نتیجه: هر بار کاربر باید دوباره وارد شود (طبق خواسته‌ی کارفرما)
  * ═══════════════════════════════════════════════════════════════
  */
 public class LoginActivity extends AppCompatActivity {
@@ -72,15 +73,19 @@ public class LoginActivity extends AppCompatActivity {
         currentLang = LocaleHelper.getLanguage(this);
         LocaleHelper.applyLocale(this, currentLang);
 
+        // ★ سشن قبلی را پاک کن (توکن ذخیره نمی‌شود، ولی برای اطمینان)
         session = new SessionManager(this);
-
-        // ★ چک کامل: توکن معتبر است (نه فقط موجود بودن)
-        if (session.isSessionValid()) {
-            goToMain();
-            return;
-        } else if (session.isLoggedIn()) {
-            // توکن هست ولی منقضی/نامعتبر → پاکش کن
+        if (session.isLoggedIn()) {
             session.clear();
+        }
+
+        // ★ کوکی‌های WebView را پاک کن
+        // چون کاربر هر بار باید لاگین کند، سشن PHP قبلی هم باید پاک شود
+        try {
+            CookieManager.getInstance().removeAllCookies(null);
+            CookieManager.getInstance().flush();
+        } catch (Exception e) {
+            Log.w(TAG, "Failed to clear cookies", e);
         }
 
         setContentView(R.layout.activity_login);
@@ -106,6 +111,9 @@ public class LoginActivity extends AppCompatActivity {
 
         // ★ لود لوگوی Picasso در فوتر
         loadPicassoFooter();
+
+        // ★ اگر username قبلی ذخیره شده، پر کن (اختیاری — برای راحتی)
+        restoreSavedUsername();
     }
 
     /* ═══════════════════════════════════════════════════════════
@@ -420,7 +428,12 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     /* ═══════════════════════════════════════════════════════════
-       LOGIN SUCCESS
+       ★ LOGIN SUCCESS
+       
+       - توکن در SharedPreferences ذخیره نمی‌شود
+       - فقط username برای راحتی کاربر ذخیره می‌شود
+       - توکن از طریق Intent به MainActivity پاس می‌شود
+       - زبان و تم کاربر ذخیره می‌شوند (چون تجربه‌ی کاربر بهتر می‌شود)
        ═══════════════════════════════════════════════════════════ */
     private void handleLoginSuccess(JSONObject response) {
         try {
@@ -443,23 +456,56 @@ public class LoginActivity extends AppCompatActivity {
             String lang = user.optString("language", currentLang);
             String theme = user.optString("theme", "auto");
 
-            session.saveSession(token, expiresAt, userId, username,
-                    firstName, lastName, fullName, phone, email,
-                    lang, theme, android.os.Build.MODEL);
-
-            // ★ ذخیره تنظیمات کاربر
+            // ★ فقط تنظیمات پایه را ذخیره می‌کنیم — نه توکن!
             if (LocaleHelper.isValid(lang)) LocaleHelper.saveLanguage(this, lang);
             if (theme != null) ThemeHelper.saveMode(this, theme);
+
+            // ★ ذخیره‌ی username برای پر شدن خودکار در ورود بعدی (اختیاری)
+            if (!username.isEmpty()) {
+                try {
+                    getSharedPreferences("boom_prefs", MODE_PRIVATE)
+                        .edit()
+                        .putString("last_username", username)
+                        .apply();
+                } catch (Exception ignored) {}
+            }
+
+            // ★★ نکته مهم: دیگر session.saveSession صدا زده نمی‌شود
 
             Toast.makeText(this,
                     getString(R.string.success_welcome) + " " + fullName,
                     Toast.LENGTH_SHORT).show();
 
-            goToMain();
+            // ★ توکن را از طریق Intent به MainActivity بفرست
+            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+            intent.putExtra("session_token", token);
+            intent.putExtra("user_id", userId);
+            intent.putExtra("user_full_name", fullName);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            finish();
+
         } catch (Exception e) {
             Log.e(TAG, "handleLoginSuccess", e);
             showError(getString(R.string.login_error_server));
         }
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       ★ RESTORE SAVED USERNAME
+       ═══════════════════════════════════════════════════════════ */
+    private void restoreSavedUsername() {
+        try {
+            String lastUsername = getSharedPreferences("boom_prefs", MODE_PRIVATE)
+                    .getString("last_username", "");
+            if (lastUsername != null && !lastUsername.isEmpty() && loginInput != null) {
+                loginInput.setText(lastUsername);
+                // cursor به آخر
+                if (loginInput.getText() != null) {
+                    loginInput.setSelection(loginInput.getText().length());
+                }
+            }
+        } catch (Exception ignored) {}
     }
 
     /* ═══════════════════════════════════════════════════════════
@@ -470,7 +516,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     /* ═══════════════════════════════════════════════════════════
-       ★ LOAD PICASSO FOOTER
+       LOAD PICASSO FOOTER
        ═══════════════════════════════════════════════════════════ */
     private void loadPicassoFooter() {
         if (picassoLogo == null) return;
@@ -523,13 +569,6 @@ public class LoginActivity extends AppCompatActivity {
     private String text(TextInputEditText e) {
         if (e == null || e.getText() == null) return "";
         return e.getText().toString().trim();
-    }
-
-    private void goToMain() {
-        Intent i = new Intent(LoginActivity.this, MainActivity.class);
-        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(i);
-        finish();
     }
 
     @Override
