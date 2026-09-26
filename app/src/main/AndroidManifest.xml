@@ -52,25 +52,24 @@
         android:largeHeap="true"
         android:theme="@style/AppTheme">
 
+        <!-- ═══════════════════════════════════════════════════════════
+             LoginActivity — ورودی اصلی اپ
+             ═══════════════════════════════════════════════════════════ -->
         <activity
-            android:name=".MainActivity"
-            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|smallestScreenSize|uiMode"
+            android:name=".LoginActivity"
             android:exported="true"
             android:screenOrientation="portrait"
-            android:launchMode="singleTask"
+            android:launchMode="singleTop"
             android:windowSoftInputMode="adjustResize"
             android:theme="@style/AppTheme">
 
-            <!-- ═══ Launcher ═══ -->
+            <!-- Launcher -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
-            <!-- ═══════════════════════════════════════════════════
-                 Deep Link 1: boomapp://
-                 برای وقتی که Custom Tab می‌خواد به اپ برگرده
-                 ═══════════════════════════════════════════════════ -->
+            <!-- Deep Link 1: boomapp:// (برگشت از بیومتریک) -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -78,10 +77,7 @@
                 <data android:scheme="boomapp" />
             </intent-filter>
 
-            <!-- ═══════════════════════════════════════════════════
-                 Deep Link 2: https://boom.picassooads.ir
-                 برای برگشت خودکار از Custom Tab به اپ
-                 ═══════════════════════════════════════════════════ -->
+            <!-- Deep Link 2: https://boom.picassooads.ir -->
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -92,8 +88,41 @@
         </activity>
 
         <!-- ═══════════════════════════════════════════════════════════
-             BiometricActivity — WebView داخلی برای بیومتریک
-             بدون نوار آدرس، همان ظاهر اپ
+             MainActivity — WebView پلتفرم
+             ═══════════════════════════════════════════════════════════ -->
+        <activity
+            android:name=".MainActivity"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|smallestScreenSize|uiMode"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:launchMode="singleTask"
+            android:windowSoftInputMode="adjustResize"
+            android:theme="@style/AppTheme" />
+
+        <!-- ═══════════════════════════════════════════════════════════
+             RegisterActivity — ثبت‌نام
+             ═══════════════════════════════════════════════════════════ -->
+        <activity
+            android:name=".RegisterActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:launchMode="singleTop"
+            android:windowSoftInputMode="adjustResize"
+            android:theme="@style/AppTheme" />
+
+        <!-- ═══════════════════════════════════════════════════════════
+             ForgotPasswordActivity — بازیابی رمز
+             ═══════════════════════════════════════════════════════════ -->
+        <activity
+            android:name=".ForgotPasswordActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:launchMode="singleTop"
+            android:windowSoftInputMode="adjustResize"
+            android:theme="@style/AppTheme" />
+
+        <!-- ═══════════════════════════════════════════════════════════
+             BiometricActivity — قبلاً اضافه شده (نگه می‌داریم)
              ═══════════════════════════════════════════════════════════ -->
         <activity
             android:name=".BiometricActivity"
