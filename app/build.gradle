@@ -11,7 +11,15 @@ android {
         targetSdkVersion 34
         versionCode 4
         versionName "4"
-        resValue "string", "appName", "Boom Picasso"
+
+        // ★ resValue حذف شد — چون appName در strings.xml تعریف شده
+        // اگر هر دو باشند، خطای "Duplicate resources" می‌دهد
+
+        // ★ برای پشتیبانی از vector drawable در همه‌ی APIها
+        vectorDrawables.useSupportLibrary = true
+
+        // ★ برای پشتیبانی چندزبانه
+        resConfigs "fa", "en", "ar", "fr", "it", "de"
     }
 
     signingConfigs {
@@ -26,7 +34,12 @@ android {
     buildTypes {
         release {
             minifyEnabled false
+            shrinkResources false
             signingConfig signingConfigs.release
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            minifyEnabled false
         }
     }
 
@@ -81,7 +94,7 @@ dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
     // ═══════════════════════════════════════════════════════════
-    // AndroidX (نسخه‌های Java-based برای جلوگیری از تضاد Kotlin)
+    // AndroidX (نسخه‌های Java-based)
     // ═══════════════════════════════════════════════════════════
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'androidx.core:core:1.12.0'
@@ -90,8 +103,18 @@ dependencies {
     implementation 'androidx.browser:browser:1.5.0'
 
     // ═══════════════════════════════════════════════════════════
-    // ★ جدید: Material Components
+    // Material Components
     // برای TextInputLayout، MaterialButton، TabLayout
     // ═══════════════════════════════════════════════════════════
     implementation 'com.google.android.material:material:1.11.0'
+
+    // ═══════════════════════════════════════════════════════════
+    // ConstraintLayout — برای layout های پیچیده‌تر
+    // ═══════════════════════════════════════════════════════════
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+
+    // ═══════════════════════════════════════════════════════════
+    // ★ برای BiometricPrompt نیتیو (اثر انگشت/چهره)
+    // ═══════════════════════════════════════════════════════════
+    implementation 'androidx.biometric:biometric:1.1.0'
 }
