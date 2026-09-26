@@ -9,7 +9,7 @@
     tools:context=".LoginActivity">
 
     <!-- ═══════════════════════════════════════════════════════════
-         BACKGROUND LIGHTS — نورهای فیروزه‌ای
+         BACKGROUND LIGHTS
          ═══════════════════════════════════════════════════════════ -->
     <ImageView
         android:id="@+id/bgLight1"
@@ -64,7 +64,7 @@
             android:paddingBottom="20dp">
 
             <!-- ═══════════════════════════════════════════
-                 TOP ACTIONS — Language + Theme
+                 TOP ACTIONS
                  ═══════════════════════════════════════════ -->
             <LinearLayout
                 android:layout_width="match_parent"
@@ -73,7 +73,6 @@
                 android:gravity="end"
                 android:layout_marginBottom="2dp">
 
-                <!-- Theme Toggle -->
                 <FrameLayout
                     android:id="@+id/themeBtn"
                     android:layout_width="42dp"
@@ -94,7 +93,6 @@
                         android:contentDescription="@string/theme_toggle"/>
                 </FrameLayout>
 
-                <!-- Language Toggle -->
                 <FrameLayout
                     android:id="@+id/langBtn"
                     android:layout_width="42dp"
@@ -185,7 +183,7 @@
                 android:background="@drawable/bg_tab_container"
                 app:tabIndicator="@drawable/bg_tab_indicator"
                 app:tabIndicatorColor="@color/boomSurface"
-                app:tabIndicatorHeight="match_parent"
+                app:tabIndicatorHeight="48dp"
                 app:tabIndicatorGravity="stretch"
                 app:tabSelectedTextColor="@color/boomPrimary"
                 app:tabTextColor="@color/boomTextMuted"
@@ -250,7 +248,6 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <!-- Username field -->
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/loginInputLayout"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
@@ -282,7 +279,6 @@
                         android:fontFamily="sans-serif"/>
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <!-- Password field -->
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/passwordLayout"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
@@ -316,7 +312,6 @@
                         android:fontFamily="sans-serif"/>
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <!-- Login + Biometric row -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
@@ -360,7 +355,6 @@
                     </FrameLayout>
                 </LinearLayout>
 
-                <!-- Forgot password -->
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/forgotBtn"
                     style="@style/Widget.MaterialComponents.Button.TextButton"
@@ -388,7 +382,6 @@
                 android:orientation="vertical"
                 android:visibility="gone">
 
-                <!-- OTP Header -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -436,7 +429,6 @@
                         android:gravity="center"/>
                 </LinearLayout>
 
-                <!-- OTP Boxes -->
                 <LinearLayout
                     android:id="@+id/otpBoxes"
                     android:layout_width="match_parent"
@@ -476,7 +468,6 @@
                         style="@style/BoomOtpBox"/>
                 </LinearLayout>
 
-                <!-- Verify button -->
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/verifyOtpBtn"
                     style="@style/Widget.MaterialComponents.Button"
@@ -494,7 +485,6 @@
                     app:elevation="0dp"
                     android:layout_marginBottom="12dp"/>
 
-                <!-- OTP actions -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
