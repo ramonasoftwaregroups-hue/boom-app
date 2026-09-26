@@ -1,5 +1,6 @@
 package ir.picassooads.boom.twa;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -14,9 +15,10 @@ import java.util.Locale;
  * ═══════════════════════════════════════════════════════════════
  * LocaleHelper — مدیریت زبان و اعمال آن به اپ
  * 
- * • ذخیره زبان انتخابی در SharedPreferences
- * • تغییر Configuration اپ
- * • اعمال فونت مناسب (Peyda برای fa/ar، Arciform برای بقیه)
+ * v2 — اصلاحات:
+ *   • اضافه شدن forceLocale() که زبان را فوراً روی Activity اعمال می‌کند
+ *   • fallback به فارسی (نه به زبان سیستم)
+ *   • تغییر زبان بدون نیاز به recreate پیچیده
  * ═══════════════════════════════════════════════════════════════
  */
 public class LocaleHelper {
@@ -31,6 +33,7 @@ public class LocaleHelper {
        ذخیره و خواندن زبان
        ═══════════════════════════════════════════════════════════ */
     public static void saveLanguage(Context context, String lang) {
+        if (!isValid(lang)) return;
         SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
         prefs.edit().putString(KEY_LANG, lang).apply();
     }
@@ -41,9 +44,7 @@ public class LocaleHelper {
         if (saved != null && isValid(saved)) {
             return saved;
         }
-        // fallback به زبان سیستم اگر پشتیبانی می‌شود
-        String sysLang = Locale.getDefault().getLanguage();
-        if (isValid(sysLang)) return sysLang;
+        // ★ fallback به فارسی (نه به زبان سیستم)
         return DEFAULT;
     }
 
@@ -60,7 +61,32 @@ public class LocaleHelper {
     }
 
     /* ═══════════════════════════════════════════════════════════
-       اعمال زبان به Context
+       ★ forceLocale — اعمال فوری زبان روی Activity
+       
+       این متد زبان را بلافاصله روی منابع Activity اعمال می‌کند
+       و نیازی به attachBaseContext یا recreate ندارد.
+       ═══════════════════════════════════════════════════════════ */
+    public static void forceLocale(Activity activity, String lang) {
+        if (activity == null) return;
+        if (!isValid(lang)) lang = DEFAULT;
+
+        Locale locale = new Locale(lang);
+        Locale.setDefault(locale);
+
+        Configuration config = new Configuration(activity.getResources().getConfiguration());
+        config.setLocale(locale);
+        config.setLayoutDirection(locale);
+
+        // ★ روش مستقیم — روی همه‌ی API ها کار می‌کند
+        activity.getResources().updateConfiguration(
+                config,
+                activity.getResources().getDisplayMetrics()
+        );
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       applyLocale — برای استفاده در attachBaseContext
+       (روش پیشنهادی برای اپ‌هایی که می‌خواهند در همه Activity ها اعمال شود)
        ═══════════════════════════════════════════════════════════ */
     public static Context applyLocale(Context context, String lang) {
         if (!isValid(lang)) lang = DEFAULT;
@@ -102,7 +128,6 @@ public class LocaleHelper {
 
         if (view instanceof TextView) {
             TextView tv = (TextView) view;
-            // فونت اصلی را نگه می‌داریم تا اگر bold بود حفظ شود
             android.graphics.Typeface original = tv.getTypeface();
             if (original != null && original.isBold()) {
                 tv.setTypeface(tf, android.graphics.Typeface.BOLD);
