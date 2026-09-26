@@ -1,39 +1,420 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/registerRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/boomBg"
-    android:orientation="vertical"
-    android:gravity="center"
-    android:padding="32dp">
+    android:background="@color/boomBg">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="ثبت‌نام"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:textColor="@color/boomTextPrimary"
-        android:layout_marginBottom="16dp" />
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        android:scrollbars="none"
+        android:overScrollMode="never">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="این صفحه به‌زودی تکمیل می‌شود"
-        android:textSize="14sp"
-        android:textColor="@color/boomTextMuted"
-        android:layout_marginBottom="32dp" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingStart="22dp"
+            android:paddingEnd="22dp"
+            android:paddingTop="16dp"
+            android:paddingBottom="20dp">
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/backButton"
-        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-        android:layout_width="wrap_content"
-        android:layout_height="48dp"
-        android:text="بازگشت"
-        android:textAllCaps="false"
-        app:cornerRadius="16dp"
-        app:strokeColor="@color/boomPrimary"
-        android:textColor="@color/boomPrimary" />
+            <!-- Top bar -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="16dp">
 
-</LinearLayout>
+                <FrameLayout
+                    android:id="@+id/backBtn"
+                    android:layout_width="42dp"
+                    android:layout_height="42dp"
+                    android:background="@drawable/bg_icon_btn"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:elevation="2dp">
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_back"
+                        app:tint="@color/boomTextStrong"
+                        android:contentDescription="@null"/>
+                </FrameLayout>
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/register_title"
+                    android:textColor="@color/boomTextStrong"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:layout_marginStart="12dp"/>
+            </LinearLayout>
+
+            <!-- Steps indicator -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_marginBottom="24dp">
+
+                <TextView
+                    android:id="@+id/step1Dot"
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:background="@drawable/bg_step_circle_active"
+                    android:gravity="center"
+                    android:text="۱"
+                    android:textColor="@android:color/white"
+                    android:textSize="13sp"
+                    android:textStyle="bold"/>
+
+                <View
+                    android:id="@+id/stepLine1"
+                    android:layout_width="28dp"
+                    android:layout_height="2.5dp"
+                    android:layout_marginStart="6dp"
+                    android:layout_marginEnd="6dp"
+                    android:background="@drawable/bg_step_line"/>
+
+                <TextView
+                    android:id="@+id/step2Dot"
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:background="@drawable/bg_step_circle"
+                    android:gravity="center"
+                    android:text="۲"
+                    android:textColor="@color/boomTextSubtle"
+                    android:textSize="13sp"
+                    android:textStyle="bold"/>
+
+                <View
+                    android:id="@+id/stepLine2"
+                    android:layout_width="28dp"
+                    android:layout_height="2.5dp"
+                    android:layout_marginStart="6dp"
+                    android:layout_marginEnd="6dp"
+                    android:background="@drawable/bg_step_line"/>
+
+                <TextView
+                    android:id="@+id/step3Dot"
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:background="@drawable/bg_step_circle"
+                    android:gravity="center"
+                    android:text="۳"
+                    android:textColor="@color/boomTextSubtle"
+                    android:textSize="13sp"
+                    android:textStyle="bold"/>
+            </LinearLayout>
+
+            <!-- Error alert -->
+            <LinearLayout
+                android:id="@+id/errorAlert"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:background="@drawable/bg_alert_error"
+                android:padding="12dp"
+                android:layout_marginBottom="14dp"
+                android:visibility="gone">
+
+                <ImageView
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:src="@drawable/ic_error"
+                    app:tint="@color/boomError"
+                    android:layout_marginEnd="10dp"/>
+
+                <TextView
+                    android:id="@+id/errorText"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textColor="@color/boomError"
+                    android:textSize="12.5sp"/>
+            </LinearLayout>
+
+            <!-- ═══ STEP 1 ═══ -->
+            <LinearLayout
+                android:id="@+id/step1Container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/firstNameLayout"
+                    style="@style/BoomTextInputLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/register_hint_first_name"
+                    android:layout_marginBottom="12dp">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/firstNameInput"
+                        style="@style/BoomTextInputEditText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textPersonName"
+                        android:maxLines="1"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/lastNameLayout"
+                    style="@style/BoomTextInputLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/register_hint_last_name"
+                    android:layout_marginBottom="12dp">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/lastNameInput"
+                        style="@style/BoomTextInputEditText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textPersonName"
+                        android:maxLines="1"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/usernameLayout"
+                    style="@style/BoomTextInputLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/register_hint_username"
+                    app:endIconMode="clear_text"
+                    android:layout_marginBottom="12dp">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/usernameInput"
+                        style="@style/BoomTextInputEditText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="text"
+                        android:maxLines="1"
+                        android:textDirection="ltr"
+                        android:textAlignment="viewStart"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/regPasswordLayout"
+                    style="@style/BoomTextInputLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/register_hint_password"
+                    app:endIconMode="password_toggle"
+                    android:layout_marginBottom="12dp">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/regPasswordInput"
+                        style="@style/BoomTextInputEditText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textPassword"
+                        android:maxLines="1"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/confirmPasswordLayout"
+                    style="@style/BoomTextInputLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/register_hint_confirm_password"
+                    app:endIconMode="password_toggle"
+                    android:layout_marginBottom="14dp">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/confirmPasswordInput"
+                        style="@style/BoomTextInputEditText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textPassword"
+                        android:maxLines="1"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Privacy checkbox -->
+                <CheckBox
+                    android:id="@+id/privacyCheck"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/register_terms"
+                    android:textSize="12sp"
+                    android:buttonTint="@color/boomPrimary"
+                    android:layout_marginBottom="14dp"/>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/nextBtn"
+                    style="@style/Widget.MaterialComponents.Button"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:text="@string/register_next"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:textAllCaps="false"
+                    android:letterSpacing="0"
+                    android:textColor="@android:color/white"
+                    app:backgroundTint="@color/boomPrimary"
+                    app:cornerRadius="14dp"
+                    app:elevation="0dp"/>
+            </LinearLayout>
+
+            <!-- ═══ STEP 2 ═══ -->
+            <LinearLayout
+                android:id="@+id/step2Container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:text="@string/register_hint_phone"
+                    android:textColor="@color/boomTextStrong"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="8dp"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:text="@string/register_phone_help"
+                    android:textColor="@color/boomTextMuted"
+                    android:textSize="12.5sp"
+                    android:layout_marginBottom="20dp"/>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/phoneLayout"
+                    style="@style/BoomTextInputLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/register_hint_phone"
+                    app:startIconDrawable="@drawable/ic_phone"
+                    app:startIconTint="@color/boomTextSubtle"
+                    android:layout_marginBottom="14dp">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/phoneInput"
+                        style="@style/BoomTextInputEditText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="phone"
+                        android:maxLines="1"
+                        android:textDirection="ltr"
+                        android:textAlignment="viewStart"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/prevBtn"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="56dp"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="4dp"
+                        android:text="@string/register_prev"
+                        android:textSize="14sp"
+                        android:textAllCaps="false"
+                        android:letterSpacing="0"
+                        app:strokeColor="@color/boomPrimary"
+                        app:strokeWidth="1.5dp"
+                        app:cornerRadius="14dp"
+                        android:textColor="@color/boomPrimary"/>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/sendCodeBtn"
+                        style="@style/Widget.MaterialComponents.Button"
+                        android:layout_width="0dp"
+                        android:layout_height="56dp"
+                        android:layout_weight="2"
+                        android:layout_marginStart="4dp"
+                        android:text="@string/register_send_code"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        android:textAllCaps="false"
+                        android:letterSpacing="0"
+                        android:textColor="@android:color/white"
+                        app:backgroundTint="@color/boomPrimary"
+                        app:cornerRadius="14dp"
+                        app:elevation="0dp"/>
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- ═══ STEP 3 ═══ -->
+            <LinearLayout
+                android:id="@+id/step3Container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:text="@string/otp_title"
+                    android:textColor="@color/boomTextStrong"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="4dp"/>
+
+                <TextView
+                    android:id="@+id/regOtpSub"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:text="@string/register_otp_sent_to"
+                    android:textColor="@color/boomTextMuted"
+                    android:textSize="12.5sp"
+                    android:layout_marginBottom="20dp"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center"
+                    android:layoutDirection="ltr"
+                    android:layout_marginBottom="18dp">
+
+                    <EditText android:id="@+id/regOtp1" style="@style/BoomOtpBox" android:layout_marginEnd="6dp"/>
+                    <EditText android:id="@+id/regOtp2" style="@style/BoomOtpBox" android:layout_marginEnd="6dp"/>
+                    <EditText android:id="@+id/regOtp3" style="@style/BoomOtpBox" android:layout_marginEnd="6dp"/>
+                    <EditText android:id="@+id/regOtp4" style="@style/BoomOtpBox" android:layout_marginEnd="6dp"/>
+                    <EditText android:id="@+id/regOtp5" style="@style/BoomOtpBox" android:layout_marginEnd="6dp"/>
+                    <EditText android:id="@+id/regOtp6" style="@style/BoomOtpBox"/>
+                </LinearLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/createAccountBtn"
+                    style="@style/Widget.MaterialComponents.Button"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:text="@string/register_create_account"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:textAllCaps="false"
+                    android:letterSpacing="0"
+                    android:textColor="@android:color/white"
+                    app:backgroundTint="@color/boomPrimary"
+                    app:cornerRadius="14dp"
+                    app:elevation="0dp"/>
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+</FrameLayout>
