@@ -1,5 +1,6 @@
 package ir.picassooads.boom.twa;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
@@ -21,6 +22,17 @@ import com.google.android.material.textfield.TextInputLayout;
 
 import org.json.JSONObject;
 
+/**
+ * ═══════════════════════════════════════════════════════════════
+ * RegisterActivity — صفحه‌ی ثبت‌نام نیتیو
+ * 
+ * v2 — اصلاحات:
+ *   • attachBaseContext برای اعمال زبان روی کل Activity
+ *   • حذف session.saveSession — توکن در SharedPreferences ذخیره نمی‌شود
+ *   • توکن از طریق Intent به MainActivity منتقل می‌شود
+ *   • زبان و تم کاربر از سرور اعمال می‌شود
+ * ═══════════════════════════════════════════════════════════════
+ */
 public class RegisterActivity extends AppCompatActivity {
 
     private static final String TAG = "RegisterActivity";
@@ -38,19 +50,27 @@ public class RegisterActivity extends AppCompatActivity {
     private EditText[] otpBoxes = new EditText[6];
 
     private ApiClient api;
-    private SessionManager session;
     private int currentStep = 1;
     private String currentOtpToken = "";
 
+    /* ═══════════════════════════════════════════════════════════
+       ★ attachBaseContext — اعمال زبان روی کل Activity
+       ═══════════════════════════════════════════════════════════ */
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        String lang = LocaleHelper.getLanguage(newBase);
+        Context ctx = LocaleHelper.applyLocale(newBase, lang);
+        super.attachBaseContext(ctx);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // ★ اعمال تم قبل از super
         ThemeHelper.applySavedMode(this);
+
         super.onCreate(savedInstanceState);
 
         String lang = LocaleHelper.getLanguage(this);
-        LocaleHelper.applyLocale(this, lang);
-        session = new SessionManager(this);
-
         setContentView(R.layout.activity_register);
         api = new ApiClient(this);
 
@@ -145,7 +165,6 @@ public class RegisterActivity extends AppCompatActivity {
         step2Container.setVisibility(step == 2 ? View.VISIBLE : View.GONE);
         step3Container.setVisibility(step == 3 ? View.VISIBLE : View.GONE);
 
-        // Update indicators
         step1Dot.setBackgroundResource(step > 1 ?
                 R.drawable.bg_step_circle_done : R.drawable.bg_step_circle_active);
         step2Dot.setBackgroundResource(step > 2 ?
@@ -231,6 +250,13 @@ public class RegisterActivity extends AppCompatActivity {
                 });
     }
 
+    /* ═══════════════════════════════════════════════════════════
+       ★ VERIFY REGISTER
+       
+       - توکن ذخیره نمی‌شود
+       - از طریق Intent به MainActivity فرستاده می‌شود
+       - زبان و تم از سرور اعمال می‌شوند
+       ═══════════════════════════════════════════════════════════ */
     private void doVerifyRegister() {
         hideError();
         StringBuilder sb = new StringBuilder();
@@ -256,35 +282,60 @@ public class RegisterActivity extends AppCompatActivity {
                     return;
                 }
 
-                // ذخیره توکن
                 try {
                     String token = response.optString("token", "");
                     String expiresAt = response.optString("expires_at", "");
                     JSONObject user = response.optJSONObject("user");
-                    if (user != null && !token.isEmpty()) {
-                        session.saveSession(token, expiresAt,
-                                user.optInt("id", 0),
-                                user.optString("username", ""),
-                                user.optString("first_name", ""),
-                                user.optString("last_name", ""),
-                                user.optString("full_name", ""),
-                                user.optString("phone", ""),
-                                user.optString("email", ""),
-                                user.optString("language", "fa"),
-                                user.optString("theme", "auto"),
-                                android.os.Build.MODEL);
+
+                    if (user == null || token.isEmpty()) {
+                        showError(getString(R.string.login_error_server));
+                        return;
                     }
+
+                    int userId = user.optInt("id", 0);
+                    String username = user.optString("username", "");
+                    String fullName = user.optString("full_name", "");
+                    String lang = user.optString("language", "fa");
+                    String theme = user.optString("theme", "auto");
+
+                    // ★ اعمال زبان کاربر
+                    if (LocaleHelper.isValid(lang)) {
+                        LocaleHelper.saveLanguage(RegisterActivity.this, lang);
+                    }
+
+                    // ★ اعمال تم کاربر
+                    if (theme != null && !theme.isEmpty()) {
+                        ThemeHelper.saveUserTheme(RegisterActivity.this, theme);
+                    }
+
+                    // ★ ذخیره username برای ورود بعدی
+                    if (!username.isEmpty()) {
+                        try {
+                            getSharedPreferences("boom_prefs", MODE_PRIVATE)
+                                .edit()
+                                .putString("last_username", username)
+                                .apply();
+                        } catch (Exception ignored) {}
+                    }
+
+                    Toast.makeText(RegisterActivity.this,
+                            R.string.success_account_created, Toast.LENGTH_LONG).show();
+
+                    // ★ توکن از طریق Intent به MainActivity
+                    Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
+                    intent.putExtra("session_token", token);
+                    intent.putExtra("user_id", userId);
+                    intent.putExtra("user_full_name", fullName);
+                    intent.putExtra("user_language", lang);
+                    intent.putExtra("user_theme", theme);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                    finish();
+
                 } catch (Exception e) {
-                    Log.e(TAG, "save session", e);
+                    Log.e(TAG, "register success handling failed", e);
+                    showError(getString(R.string.login_error_server));
                 }
-
-                Toast.makeText(RegisterActivity.this,
-                        R.string.success_account_created, Toast.LENGTH_LONG).show();
-
-                Intent i = new Intent(RegisterActivity.this, MainActivity.class);
-                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(i);
-                finish();
             }
         });
     }
