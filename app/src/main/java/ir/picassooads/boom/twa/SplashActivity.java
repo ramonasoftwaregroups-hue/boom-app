@@ -35,10 +35,9 @@ import java.net.URL;
  *   Scene 1 (۰-۲.۶s): لوگوی BOOM
  *   Scene 2 (۲.۶-۵.۲s): لوگوی Picasso
  * 
- * v2 — اصلاحات:
- *   • لود لوگوی BOOM از URL + فیلتر سفید
- *   • چک کامل اعتبار سشن (isSessionValid) قبل از رفتن به MainActivity
- *   • پاک کردن سشن منقضی قبل از رفتن به LoginActivity
+ * v3 — اصلاحات امنیتی:
+ *   • همیشه به LoginActivity می‌رود (بدون چک سشن)
+ *   • چون ما نمی‌خواهیم توکن ذخیره شود، هر بار کاربر باید وارد شود
  * ═══════════════════════════════════════════════════════════════
  */
 public class SplashActivity extends AppCompatActivity {
@@ -109,12 +108,11 @@ public class SplashActivity extends AppCompatActivity {
        SCENE 1 — لوگوی BOOM
        ═══════════════════════════════════════════════════════════ */
     private void setupScene1() {
-        // ★ ۱) فیلتر سفید — مثل filter: brightness(0) invert(1) در وب
-        //    (فقط پیکسل‌های غیرشفاف سفید می‌شوند، پس‌زمینه شفاف می‌ماند)
+        // فیلتر سفید — مثل filter: brightness(0) invert(1) در وب
         scene1Logo.setColorFilter(
                 new PorterDuffColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN));
 
-        // ★ ۲) لوگوی BOOM را از URL لود کن
+        // لوگوی BOOM از URL
         loadImageFromUrl(BOOM_LOGO_URL, scene1Logo);
     }
 
@@ -122,7 +120,6 @@ public class SplashActivity extends AppCompatActivity {
        SCENE 2 — لوگوی Picasso
        ═══════════════════════════════════════════════════════════ */
     private void setupScene2() {
-        // Picasso logo از URL دانلود می‌شود
         loadImageFromUrl(PICASSO_LOGO_URL, scene2Logo);
     }
 
@@ -316,40 +313,17 @@ public class SplashActivity extends AppCompatActivity {
     }
 
     /* ═══════════════════════════════════════════════════════════
-       ★ NAVIGATE — با چک کامل اعتبار سشن
+       ★ NAVIGATE — همیشه به Login (بدون چک سشن)
+       
+       چون نمی‌خواهیم توکن ذخیره شود، هر بار کاربر باید دوباره وارد شود.
+       Splash فقط برای نمایش برند است، تصمیم‌گیری امنیتی در LoginActivity.
        ═══════════════════════════════════════════════════════════ */
     private void navigateNext() {
         if (navigated) return;
         navigated = true;
 
-        SessionManager session = new SessionManager(this);
-
-        // ★ چک کامل: توکن هست + منقضی نشده
-        if (session.isSessionValid()) {
-            // توکن معتبر → داشبورد
-            goToMain();
-        } else {
-            // توکن نیست یا منقضی است → پاکش کن و برو به Login
-            if (session.isLoggedIn()) {
-                session.clear();
-            }
-            goToLogin();
-        }
-    }
-
-    private void goToMain() {
-        Intent intent = new Intent(SplashActivity.this, MainActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-
-        getWindow().getDecorView().animate()
-                .alpha(0f)
-                .setDuration(300)
-                .withEndAction(() -> {
-                    startActivity(intent);
-                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-                    finish();
-                })
-                .start();
+        // ★ همیشه به LoginActivity
+        goToLogin();
     }
 
     private void goToLogin() {
