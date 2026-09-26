@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         BOOM — Dark Colors
+         ═══════════════════════════════════════════════════════════ -->
+
+    <!-- Primary Brand -->
+    <color name="boomPrimary">#00B3C9</color>
+    <color name="boomPrimaryLight">#00d4eb</color>
+    <color name="boomPrimaryBright">#00e5ff</color>
+    <color name="boomPrimaryDark">#008ea6</color>
+    <color name="boomPrimarySoft">#2400B3C9</color>
+
+    <!-- Surfaces -->
+    <color name="boomBg">#0A0F16</color>
+    <color name="boomSurface">#131A24</color>
+    <color name="boomSurfaceVariant">#1B2430</color>
+    <color name="boomSurfaceSemi">#D9131A24</color>
+
+    <!-- Text -->
+    <color name="boomText">#CBD5E1</color>
+    <color name="boomTextStrong">#F1F5F9</color>
+    <color name="boomTextMuted">#94A3B8</color>
+    <color name="boomTextSubtle">#64748B</color>
+    <color name="boomTextInput">#E2E8F0</color>
+
+    <!-- Borders -->
+    <color name="boomBorder">#24303F</color>
+    <color name="boomBorderStrong">#334155</color>
+
+    <!-- Status colors -->
+    <color name="boomError">#EF4444</color>
+    <color name="boomErrorBg">#26EF4444</color>
+    <color name="boomErrorBorder">#4DEF4444</color>
+    <color name="boomSuccess">#10B981</color>
+    <color name="boomSuccessBg">#2610B981</color>
+    <color name="boomWarning">#F59E0B</color>
+    <color name="boomInfo">#3B82F6</color>
+
+    <!-- Tab & misc -->
+    <color name="boomTabBg">#1B2430</color>
+    <color name="boomDivider">#24303F</color>
+    <color name="boomTextPrimary">#F1F5F9</color>
+
+    <!-- Status bar & nav bar -->
+    <color name="boomStatusBar">#0A0F16</color>
+    <color name="boomNavBar">#0A0F16</color>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         COMPATIBILITY
+         ═══════════════════════════════════════════════════════════ -->
+    <color name="colorPrimary">#00B3C9</color>
+    <color name="colorPrimaryDark">#008ea6</color>
+    <color name="colorAccent">#00d4eb</color>
+    <color name="backgroundColor">#0A0F16</color>
+    <color name="navigationColor">#0A0F16</color>
+    <color name="shortcut_background">#007C93</color>
+
+</resources>
