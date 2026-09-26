@@ -1,36 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- ═══════════ اینترنت و شبکه ═══════════ -->
+    <!-- ═══════════════════════════════════════════════════════════
+         PERMISSIONS
+         ═══════════════════════════════════════════════════════════ -->
+
+    <!-- اینترنت و شبکه -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
-    <!-- ═══════════ موقعیت مکانی (Location) ═══════════ -->
+    <!-- موقعیت مکانی -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
-    <!-- ═══════════ دوربین (Camera) ═══════════ -->
+    <!-- دوربین -->
     <uses-permission android:name="android.permission.CAMERA" />
 
-    <!-- ═══════════ میکروفون (Microphone) ═══════════ -->
+    <!-- میکروفون -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
 
-    <!-- ═══════════ گالری / فایل‌ها ═══════════ -->
+    <!-- گالری / فایل‌ها -->
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
-                     android:maxSdkVersion="32" />
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
 
-    <!-- ═══════════ قابلیت‌های اختیاری سخت‌افزار ═══════════ -->
+    <!-- ★ بیومتریک -->
+    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
+    <uses-permission android:name="android.permission.USE_FINGERPRINT" />
+
+    <!-- ═══════════════════════════════════════════════════════════
+         OPTIONAL HARDWARE FEATURES
+         ═══════════════════════════════════════════════════════════ -->
     <uses-feature android:name="android.hardware.camera"      android:required="false" />
     <uses-feature android:name="android.hardware.microphone"  android:required="false" />
     <uses-feature android:name="android.hardware.location"    android:required="false" />
+    <uses-feature android:name="android.hardware.fingerprint" android:required="false" />
 
     <!-- ═══════════════════════════════════════════════════════════
-         Queries (الزامی برای Custom Tabs و Deep Linking)
+         QUERIES — برای Custom Tabs و Deep Linking
          ═══════════════════════════════════════════════════════════ -->
     <queries>
         <intent>
@@ -42,6 +54,9 @@
         </intent>
     </queries>
 
+    <!-- ═══════════════════════════════════════════════════════════
+         APPLICATION
+         ═══════════════════════════════════════════════════════════ -->
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -52,9 +67,24 @@
         android:largeHeap="true"
         android:theme="@style/AppTheme">
 
-        <!-- ═══════════════════════════════════════════════════════════
-             LoginActivity — ورودی اصلی اپ
-             ═══════════════════════════════════════════════════════════ -->
+        <!-- ═══════════════════════════════════════════════════════
+             SplashActivity — نقطه‌ی شروع اپ (LAUNCHER)
+             ═══════════════════════════════════════════════════════ -->
+        <activity
+            android:name=".SplashActivity"
+            android:exported="true"
+            android:screenOrientation="portrait"
+            android:theme="@style/BoomSplashTheme">
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- ═══════════════════════════════════════════════════════
+             LoginActivity — صفحه‌ی ورود + Deep Links
+             ═══════════════════════════════════════════════════════ -->
         <activity
             android:name=".LoginActivity"
             android:exported="true"
@@ -62,12 +92,6 @@
             android:launchMode="singleTop"
             android:windowSoftInputMode="adjustResize"
             android:theme="@style/AppTheme">
-
-            <!-- Launcher -->
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
 
             <!-- Deep Link 1: boomapp:// (برگشت از بیومتریک) -->
             <intent-filter>
@@ -84,12 +108,33 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="https" android:host="boom.picassooads.ir" />
             </intent-filter>
-
         </activity>
 
-        <!-- ═══════════════════════════════════════════════════════════
+        <!-- ═══════════════════════════════════════════════════════
+             RegisterActivity — ثبت‌نام نیتیو
+             ═══════════════════════════════════════════════════════ -->
+        <activity
+            android:name=".RegisterActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:launchMode="singleTop"
+            android:windowSoftInputMode="adjustResize"
+            android:theme="@style/AppTheme" />
+
+        <!-- ═══════════════════════════════════════════════════════
+             ForgotPasswordActivity — بازیابی رمز نیتیو
+             ═══════════════════════════════════════════════════════ -->
+        <activity
+            android:name=".ForgotPasswordActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:launchMode="singleTop"
+            android:windowSoftInputMode="adjustResize"
+            android:theme="@style/AppTheme" />
+
+        <!-- ═══════════════════════════════════════════════════════
              MainActivity — WebView پلتفرم
-             ═══════════════════════════════════════════════════════════ -->
+             ═══════════════════════════════════════════════════════ -->
         <activity
             android:name=".MainActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|smallestScreenSize|uiMode"
@@ -99,31 +144,9 @@
             android:windowSoftInputMode="adjustResize"
             android:theme="@style/AppTheme" />
 
-        <!-- ═══════════════════════════════════════════════════════════
-             RegisterActivity — ثبت‌نام
-             ═══════════════════════════════════════════════════════════ -->
-        <activity
-            android:name=".RegisterActivity"
-            android:exported="false"
-            android:screenOrientation="portrait"
-            android:launchMode="singleTop"
-            android:windowSoftInputMode="adjustResize"
-            android:theme="@style/AppTheme" />
-
-        <!-- ═══════════════════════════════════════════════════════════
-             ForgotPasswordActivity — بازیابی رمز
-             ═══════════════════════════════════════════════════════════ -->
-        <activity
-            android:name=".ForgotPasswordActivity"
-            android:exported="false"
-            android:screenOrientation="portrait"
-            android:launchMode="singleTop"
-            android:windowSoftInputMode="adjustResize"
-            android:theme="@style/AppTheme" />
-
-        <!-- ═══════════════════════════════════════════════════════════
-             BiometricActivity — قبلاً اضافه شده (نگه می‌داریم)
-             ═══════════════════════════════════════════════════════════ -->
+        <!-- ═══════════════════════════════════════════════════════
+             BiometricActivity — نگه می‌داریم برای سازگاری
+             ═══════════════════════════════════════════════════════ -->
         <activity
             android:name=".BiometricActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|smallestScreenSize|uiMode"
