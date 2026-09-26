@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/boomBg"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="32dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="ثبت‌نام"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:textColor="@color/boomTextPrimary"
+        android:layout_marginBottom="16dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="این صفحه به‌زودی تکمیل می‌شود"
+        android:textSize="14sp"
+        android:textColor="@color/boomTextMuted"
+        android:layout_marginBottom="32dp" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/backButton"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:text="بازگشت"
+        android:textAllCaps="false"
+        app:cornerRadius="16dp"
+        app:strokeColor="@color/boomPrimary"
+        android:textColor="@color/boomPrimary" />
+
+</LinearLayout>
