@@ -15,6 +15,15 @@ import android.webkit.WebViewClient;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
+/**
+ * ═══════════════════════════════════════════════════════════════
+ * MainActivity — WebView پلتفرم
+ * 
+ * v2 — اصلاحات:
+ *   • چک کامل اعتبار سشن (isSessionValid) در onCreate و onResume
+ *   • پاک کردن توکن منقضی قبل از رفتن به Login
+ * ═══════════════════════════════════════════════════════════════
+ */
 public class MainActivity extends AppCompatActivity {
 
     private WebView webView;
@@ -31,7 +40,12 @@ public class MainActivity extends AppCompatActivity {
 
         session = new SessionManager(this);
 
-        if (!session.isLoggedIn()) {
+        // ★ چک کامل: توکن هست + منقضی نشده
+        if (!session.isSessionValid()) {
+            // اگر توکن بود ولی منقضی شده، پاکش کن
+            if (session.isLoggedIn()) {
+                session.clear();
+            }
             goToLogin();
             return;
         }
@@ -106,6 +120,8 @@ public class MainActivity extends AppCompatActivity {
                                 || path.endsWith("/panel/index.php")
                                 || path.contains("/login")
                                 || path.contains("/auth/"))) {
+                        // کاربر از پنل logout کرد → سشن را پاک کن
+                        session.clear();
                         goToLogin();
                         return true;
                     }
@@ -218,11 +234,16 @@ public class MainActivity extends AppCompatActivity {
         handleIntent(intent);
     }
 
+    /* ═══════════════════════════════════════════════════════════
+       ★ onResume — چک کامل اعتبار سشن
+       ═══════════════════════════════════════════════════════════ */
     @Override
     protected void onResume() {
         super.onResume();
 
-        if (session != null && !session.isLoggedIn()) {
+        if (session != null && !session.isSessionValid()) {
+            // توکن منقضی یا نامعتبر شد → پاکش کن و برو Login
+            session.clear();
             goToLogin();
             return;
         }
