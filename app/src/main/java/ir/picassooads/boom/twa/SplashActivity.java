@@ -35,21 +35,23 @@ import java.net.URL;
  *   Scene 1 (۰-۲.۶s): لوگوی BOOM
  *   Scene 2 (۲.۶-۵.۲s): لوگوی Picasso
  * 
- * بهینه‌تر از وب:
- *   • مدت کوتاه‌تر (۵.۲ در مقابل ۷.۳ ثانیه)
- *   • انیمیشن سخت‌افزاری (ObjectAnimator)
- *   • version check غیر بلاک‌کننده
+ * v2 — اصلاحات:
+ *   • لود لوگوی BOOM از URL + فیلتر سفید
+ *   • چک کامل اعتبار سشن (isSessionValid) قبل از رفتن به MainActivity
+ *   • پاک کردن سشن منقضی قبل از رفتن به LoginActivity
  * ═══════════════════════════════════════════════════════════════
  */
 public class SplashActivity extends AppCompatActivity {
+
+    private static final String BOOM_LOGO_URL =
+            "https://boom.picassooads.ir/assets/images/boom.png";
 
     private static final String PICASSO_LOGO_URL =
             "https://picassooads.ir/shared/assets/images/logoW.png";
 
     /* ★ Timings */
     private static final long SCENE1_DURATION = 2600;
-    private static final long SCENE2_DURATION = 2600;
-    private static final long TOTAL_DURATION  = SCENE1_DURATION + SCENE2_DURATION;
+    private static final long TOTAL_DURATION  = 5200; // SCENE1 + SCENE2
 
     private LinearLayout scene1, scene2;
     private View scene1Glow, scene2Glow;
@@ -103,14 +105,24 @@ public class SplashActivity extends AppCompatActivity {
         versionText   = findViewById(R.id.versionText);
     }
 
+    /* ═══════════════════════════════════════════════════════════
+       SCENE 1 — لوگوی BOOM
+       ═══════════════════════════════════════════════════════════ */
     private void setupScene1() {
-        // ★ لوگو رو سفید می‌کنیم (مثل web که filter: brightness(0) invert(1))
+        // ★ ۱) فیلتر سفید — مثل filter: brightness(0) invert(1) در وب
+        //    (فقط پیکسل‌های غیرشفاف سفید می‌شوند، پس‌زمینه شفاف می‌ماند)
         scene1Logo.setColorFilter(
                 new PorterDuffColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN));
+
+        // ★ ۲) لوگوی BOOM را از URL لود کن
+        loadImageFromUrl(BOOM_LOGO_URL, scene1Logo);
     }
 
+    /* ═══════════════════════════════════════════════════════════
+       SCENE 2 — لوگوی Picasso
+       ═══════════════════════════════════════════════════════════ */
     private void setupScene2() {
-        // ★ Picasso logo از URL دانلود می‌شود
+        // Picasso logo از URL دانلود می‌شود
         loadImageFromUrl(PICASSO_LOGO_URL, scene2Logo);
     }
 
@@ -118,14 +130,12 @@ public class SplashActivity extends AppCompatActivity {
        SCENE 1 — انیمیشن ورود Boom
        ═══════════════════════════════════════════════════════════ */
     private void runScene1Animation() {
-        // Scene 1 fade in
         scene1.animate()
                 .alpha(1f)
                 .setDuration(400)
                 .setInterpolator(new DecelerateInterpolator())
                 .start();
 
-        // Glow
         scene1Glow.setScaleX(0.5f);
         scene1Glow.setScaleY(0.5f);
         scene1Glow.animate()
@@ -135,7 +145,6 @@ public class SplashActivity extends AppCompatActivity {
                 .setInterpolator(new DecelerateInterpolator())
                 .start();
 
-        // Logo: scale + rotate + fade
         scene1Logo.setScaleX(0.3f);
         scene1Logo.setScaleY(0.3f);
         scene1Logo.setRotation(-10f);
@@ -152,7 +161,6 @@ public class SplashActivity extends AppCompatActivity {
         logoSet.setInterpolator(new OvershootInterpolator(1.4f));
         logoSet.start();
 
-        // Title
         scene1Title.setTranslationY(60f);
         scene1Title.animate()
                 .translationY(0f).alpha(1f)
@@ -160,7 +168,6 @@ public class SplashActivity extends AppCompatActivity {
                 .setInterpolator(new DecelerateInterpolator())
                 .start();
 
-        // Subtitle
         scene1Subtitle.setTranslationY(30f);
         scene1Subtitle.animate()
                 .translationY(0f).alpha(1f)
@@ -309,22 +316,46 @@ public class SplashActivity extends AppCompatActivity {
     }
 
     /* ═══════════════════════════════════════════════════════════
-       NAVIGATE
+       ★ NAVIGATE — با چک کامل اعتبار سشن
        ═══════════════════════════════════════════════════════════ */
     private void navigateNext() {
         if (navigated) return;
         navigated = true;
 
         SessionManager session = new SessionManager(this);
-        Intent intent;
-        if (session.isLoggedIn()) {
-            intent = new Intent(SplashActivity.this, MainActivity.class);
+
+        // ★ چک کامل: توکن هست + منقضی نشده
+        if (session.isSessionValid()) {
+            // توکن معتبر → داشبورد
+            goToMain();
         } else {
-            intent = new Intent(SplashActivity.this, LoginActivity.class);
+            // توکن نیست یا منقضی است → پاکش کن و برو به Login
+            if (session.isLoggedIn()) {
+                session.clear();
+            }
+            goToLogin();
         }
+    }
+
+    private void goToMain() {
+        Intent intent = new Intent(SplashActivity.this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 
-        // Fade out نرم
+        getWindow().getDecorView().animate()
+                .alpha(0f)
+                .setDuration(300)
+                .withEndAction(() -> {
+                    startActivity(intent);
+                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                    finish();
+                })
+                .start();
+    }
+
+    private void goToLogin() {
+        Intent intent = new Intent(SplashActivity.this, LoginActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+
         getWindow().getDecorView().animate()
                 .alpha(0f)
                 .setDuration(300)
