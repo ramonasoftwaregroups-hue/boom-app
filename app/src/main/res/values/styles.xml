@@ -14,14 +14,13 @@
         <item name="colorOnSecondary">@android:color/white</item>
         <item name="colorSurface">@color/boomSurface</item>
         <item name="colorOnSurface">@color/boomTextStrong</item>
-        <item name="colorBackground">@color/boomBg</item>
+        <item name="android:colorBackground">@color/boomBg</item>
         <item name="colorOnBackground">@color/boomText</item>
         <item name="colorError">@color/boomError</item>
         <item name="colorOnError">@android:color/white</item>
 
         <!-- Window -->
         <item name="android:windowBackground">@color/boomBg</item>
-        <item name="android:colorBackground">@color/boomBg</item>
         <item name="android:statusBarColor">@color/boomStatusBar</item>
         <item name="android:navigationBarColor">@color/boomNavBar</item>
         <item name="android:windowLightStatusBar">false</item>
