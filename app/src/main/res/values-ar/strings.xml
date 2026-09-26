@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         SPLASH
+         ═══════════════════════════════════════════════════════════ -->
+    <string name="splash_title">بوم بيكاسو</string>
+    <string name="splash_subtitle">استوديو إنتاج المحتوى</string>
+    <string name="splash_caption">عضو في العائلة الكبيرة</string>
+    <string name="splash_accent">وكالة بيكاسو للإعلان</string>
+    <string name="splash_checking">جارٍ التحقق…</string>
+    <string name="splash_logo_boom">بوم بيكاسو</string>
+    <string name="splash_logo_picasso">بيكاسو</string>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         BRAND
+         ═══════════════════════════════════════════════════════════ -->
+    <string name="brand_name">بوم بيكاسو</string>
+    <string name="brand_tagline">أصلي لصنع قصتك</string>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         LOGIN SCREEN
+         ═══════════════════════════════════════════════════════════ -->
+    <string name="login_tab_password">الدخول بكلمة المرور</string>
+    <string name="login_tab_otp">الدخول بالرمز</string>
+    <string name="login_hint_login">اسم المستخدم أو رقم الجوال</string>
+    <string name="login_hint_password">كلمة المرور</string>
+    <string name="login_hint_otp">الرمز المكون من 6 أرقام</string>
+    <string name="login_button">تسجيل الدخول</string>
+    <string name="login_forgot_password">هل نسيت كلمة المرور؟</string>
+    <string name="login_register_now">ليس لديك حساب؟ سجّل الآن</string>
+    <string name="login_send_code">إرسال الرمز</string>
+    <string name="login_verify">تحقق ودخول</string>
+    <string name="login_resend">إعادة إرسال</string>
+    <string name="login_back">رجوع</string>
+    <string name="login_biometric_hint">الدخول ببصمة الإصبع</string>
+    <string name="login_loading">جارٍ الدخول…</string>
+    <string name="login_sending_code">جارٍ إرسال الرمز…</string>
+    <string name="login_verifying">جارٍ التحقق…</string>
+    <string name="login_secure_note">محمي بمعايير بوم</string>
+
+    <!-- LOGIN — Errors -->
+    <string name="login_error_empty_login">أدخل اسم المستخدم أو رقم الجوال</string>
+    <string name="login_error_empty_password">أدخل كلمة المرور</string>
+    <string name="login_error_empty_code">أدخل الرمز المكون من 6 أرقام</string>
+    <string name="login_error_invalid_credentials">اسم المستخدم أو كلمة المرور غير صحيحة</string>
+    <string name="login_error_invalid_code">الرمز المُدخل غير صحيح</string>
+    <string name="login_error_rate_limit">عدد المحاولات كبير. حاول مرة أخرى بعد بضع دقائق.</string>
+    <string name="login_error_sms_failed">فشل إرسال الرسالة النصية. يرجى المحاولة مرة أخرى.</string>
+    <string name="login_error_no_user_biometric">البصمة غير مُفعّلة لهذا المستخدم</string>
+    <string name="login_error_biometric_cancelled">تم إلغاء الدخول بالبصمة</string>
+    <string name="login_error_network">تحقق من اتصالك بالإنترنت</string>
+    <string name="login_error_server">خطأ في الاتصال بالخادم</string>
+    <string name="login_error_generic">حدث خطأ. يرجى المحاولة مرة أخرى</string>
+
+    <!-- LOGIN — Info -->
+    <string name="login_info_otp_sent">تم إرسال رمز التحقق إلى %1$s</string>
+    <string name="login_info_generic_sent">إذا كانت المعلومات صحيحة، سيتم إرسال رمز التحقق</string>
+    <string name="login_info_resend_cooldown">إعادة الإرسال بعد %1$d ثانية</string>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         REGISTER SCREEN
+         ═══════════════════════════════════════════════════════════ -->
+    <string name="register_title">التسجيل</string>
+    <string name="register_step1">معلومات الحساب</string>
+    <string name="register_step2">رقم الجوال</string>
+    <string name="register_step3">التحقق النهائي</string>
+    <string name="register_hint_first_name">الاسم الأول</string>
+    <string name="register_hint_last_name">اسم العائلة</string>
+    <string name="register_hint_username">اسم المستخدم</string>
+    <string name="register_hint_password">كلمة المرور</string>
+    <string name="register_hint_confirm_password">تأكيد كلمة المرور</string>
+    <string name="register_hint_phone">رقم الجوال</string>
+    <string name="register_username_help">حروف إنجليزية وأرقام وشرطة سفلية فقط</string>
+    <string name="register_password_help">8 أحرف على الأقل مع حروف كبيرة/صغيرة وأرقام ورموز</string>
+    <string name="register_phone_help">مثال: 0912 345 6789</string>
+    <string name="register_username_checking">جارٍ التحقق…</string>
+    <string name="register_username_available">متاح</string>
+    <string name="register_username_taken">اسم المستخدم محجوز</string>
+    <string name="register_username_min">3 أحرف على الأقل</string>
+    <string name="register_agree_pre">أوافق على</string>
+    <string name="register_terms">شروط الاستخدام</string>
+    <string name="register_and">و</string>
+    <string name="register_privacy">سياسة الخصوصية</string>
+    <string name="register_agree_post"></string>
+    <string name="register_next">متابعة</string>
+    <string name="register_prev">السابق</string>
+    <string name="register_send_code">إرسال رمز التحقق</string>
+    <string name="register_create_account">تحقق وإنشاء الحساب</string>
+    <string name="register_otp_sent_to">تم إرسال الرمز إلى</string>
+    <string name="register_loading">جارٍ التسجيل…</string>
+    <string name="register_creating">جارٍ إنشاء الحساب…</string>
+
+    <!-- REGISTER — Password strength -->
+    <string name="pw_very_weak">ضعيف جداً</string>
+    <string name="pw_weak">ضعيف</string>
+    <string name="pw_medium">متوسط</string>
+    <string name="pw_good">جيد</string>
+    <string name="pw_strong">قوي</string>
+
+    <!-- REGISTER — Errors -->
+    <string name="register_error_fill_required">يرجى ملء جميع الحقول المطلوبة</string>
+    <string name="register_error_name_short">يجب أن يكون الاسم الأول واسم العائلة حرفين على الأقل</string>
+    <string name="register_error_username_format">يجب أن يكون اسم المستخدم من 3 إلى 50 حرفاً بحروف إنجليزية وأرقام وشرطة سفلية</string>
+    <string name="register_error_username_taken">اسم المستخدم هذا محجوز مسبقاً</string>
+    <string name="register_error_phone_invalid">أدخل رقم جوال صحيح (09xxxxxxxxx)</string>
+    <string name="register_error_phone_taken">رقم الجوال هذا مُسجّل مسبقاً</string>
+    <string name="register_error_password_weak">يجب أن تكون كلمة المرور 8 أحرف على الأقل مع حروف كبيرة/صغيرة وأرقام ورموز خاصة</string>
+    <string name="register_error_password_mismatch">كلمتا المرور غير متطابقتين</string>
+    <string name="register_error_accept_terms">يجب قبول الشروط وسياسة الخصوصية</string>
+    <string name="register_error_otp_expired">انتهت صلاحية الرمز. اطلب واحداً جديداً</string>
+    <string name="register_error_otp_attempts">عدد المحاولات كبير. اطلب رمزاً جديداً</string>
+    <string name="register_error_otp_invalid">رمز التحقق غير صحيح</string>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         FORGOT PASSWORD SCREEN
+         ═══════════════════════════════════════════════════════════ -->
+    <string name="forgot_title">استعادة كلمة المرور</string>
+    <string name="forgot_step1">طلب الرمز</string>
+    <string name="forgot_step2">التحقق من الرمز</string>
+    <string name="forgot_step3">كلمة مرور جديدة</string>
+    <string name="forgot_heading">هل نسيت كلمة المرور؟</string>
+    <string name="forgot_sub">أدخل اسم المستخدم أو رقم الجوال لاستلام رمز الاستعادة</string>
+    <string name="forgot_hint_login">اسم المستخدم أو رقم الجوال</string>
+    <string name="forgot_hint_code">الرمز المكون من 6 أرقام</string>
+    <string name="forgot_hint_new_password">كلمة المرور الجديدة</string>
+    <string name="forgot_hint_confirm_password">تأكيد كلمة المرور الجديدة</string>
+    <string name="forgot_send_code">إرسال رمز الاستعادة</string>
+    <string name="forgot_verify">تحقق من الرمز</string>
+    <string name="forgot_reset">تغيير كلمة المرور</string>
+    <string name="forgot_otp_sent_to">تم إرسال الرمز إلى</string>
+    <string name="forgot_loading">جارٍ الإرسال…</string>
+    <string name="forgot_resetting">جارٍ تغيير كلمة المرور…</string>
+    <string name="forgot_success">تم تغيير كلمة المرور بنجاح. يرجى تسجيل الدخول مرة أخرى</string>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         SUCCESS SCREEN
+         ═══════════════════════════════════════════════════════════ -->
+    <string name="success_welcome">مرحباً!</string>
+    <string name="success_account_created">تم إنشاء حسابك بنجاح</string>
+    <string name="success_password_changed">تم تغيير كلمة المرور بنجاح</string>
+    <string name="success_redirecting">جارٍ إعادة التوجيه…</string>
+    <string name="success_go_dashboard">الدخول إلى لوحة التحكم</string>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         OTP — Common
+         ═══════════════════════════════════════════════════════════ -->
+    <string name="otp_title">أدخل رمز التحقق</string>
+    <string name="otp_sub">الرمز المكون من 6 أرقام أُرسل إلى</string>
+    <string name="otp_resend">إعادة إرسال</string>
+    <string name="otp_resend_timer">(%1$d)</string>
+    <string name="otp_back">رجوع</string>
+    <string name="otp_verify">تحقق</string>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         COMMON / SHARED
+         ═══════════════════════════════════════════════════════════ -->
+    <string name="common_or">أو</string>
+    <string name="common_back">رجوع</string>
+    <string name="common_next">متابعة</string>
+    <string name="common_cancel">إلغاء</string>
+    <string name="common_confirm">تأكيد</string>
+    <string name="common_ok">حسناً</string>
+    <string name="common_close">إغلاق</string>
+    <string name="common_retry">إعادة المحاولة</string>
+    <string name="common_loading">جارٍ التحميل…</string>
+    <string name="common_error">خطأ</string>
+    <string name="common_success">نجاح</string>
+    <string name="common_designed_by">تصميم</string>
+    <string name="common_agency">وكالة بيكاسو</string>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         THEME + LANGUAGE
+         ═══════════════════════════════════════════════════════════ -->
+    <string name="theme_toggle">تغيير المظهر</string>
+    <string name="theme_light">فاتح</string>
+    <string name="theme_dark">داكن</string>
+    <string name="theme_auto">تلقائي</string>
+    <string name="language_toggle">تغيير اللغة</string>
+    <string name="language_choose">اختر اللغة</string>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         BIOMETRIC PROMPT
+         ═══════════════════════════════════════════════════════════ -->
+    <string name="biometric_title">الدخول بالبصمة</string>
+    <string name="biometric_subtitle">تحقق من هويتك للمتابعة</string>
+    <string name="biometric_description">استخدم بصمة الإصبع أو الوجه</string>
+    <string name="biometric_cancel">إلغاء</string>
+    <string name="biometric_not_available">جهازك لا يدعم البصمة</string>
+    <string name="biometric_not_enrolled">قم بإعداد بصمة الإصبع أو الوجه في إعدادات هاتفك أولاً</string>
+    <string name="biometric_error">خطأ في المصادقة بالبصمة</string>
+    <string name="biometric_lockout">البصمة مقفلة مؤقتاً. سجّل الدخول بكلمة المرور</string>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         LOGOUT
+         ═══════════════════════════════════════════════════════════ -->
+    <string name="logout_title">تسجيل الخروج</string>
+    <string name="logout_message">هل أنت متأكد من تسجيل الخروج؟</string>
+    <string name="logout_confirm">خروج</string>
+    <string name="logout_cancel">إلغاء</string>
+
+</resources>
