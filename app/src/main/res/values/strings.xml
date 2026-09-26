@@ -37,22 +37,206 @@
     </string>
 
     <!-- ═══════════════════════════════════════════════════════════
-         Login Screen — رشته‌های صفحه ورود نیتیو
+         ★ SPLASH — صفحه‌ی شروع سینمایی
          ═══════════════════════════════════════════════════════════ -->
-    <string name="login_welcome_subtitle">برای ادامه وارد شوید</string>
+    <string name="splash_title">بوم پیکاسو</string>
+    <string name="splash_subtitle">استودیو تولید محتوا</string>
+    <string name="splash_caption">عضوی از خانواده بزرگ</string>
+    <string name="splash_accent">آژانس تبلیغاتی پیکاسو</string>
+    <string name="splash_checking">در حال بررسی…</string>
+    <string name="splash_version_prefix" translatable="false">v</string>
+    <string name="splash_logo_boom">بوم پیکاسو</string>
+    <string name="splash_logo_picasso">پیکاسو</string>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         BRAND
+         ═══════════════════════════════════════════════════════════ -->
+    <string name="brand_name">بوم پیکاسو</string>
+    <string name="brand_tagline">بومی برای خلق داستان تو</string>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         LOGIN SCREEN
+         ═══════════════════════════════════════════════════════════ -->
     <string name="login_tab_password">ورود با رمز</string>
     <string name="login_tab_otp">ورود با کد</string>
     <string name="login_hint_login">نام کاربری یا شماره همراه</string>
     <string name="login_hint_password">رمز عبور</string>
+    <string name="login_hint_otp">کد ۶ رقمی</string>
     <string name="login_button">ورود به حساب</string>
     <string name="login_forgot_password">رمز عبور را فراموش کرده‌اید؟</string>
-    <string name="login_or">یا</string>
     <string name="login_register_now">حساب کاربری ندارید؟ ثبت‌نام کنید</string>
-    <string name="login_footer">امن‌شده با استانداردهای امنیتی بوم</string>
-    <string name="login_send_code">دریافت کد تأیید</string>
+    <string name="login_send_code">ارسال کد تأیید</string>
+    <string name="login_verify">تأیید و ورود</string>
+    <string name="login_resend">ارسال مجدد</string>
+    <string name="login_back">بازگشت</string>
+    <string name="login_biometric_hint">ورود با اثر انگشت</string>
+    <string name="login_loading">در حال ورود…</string>
+    <string name="login_sending_code">در حال ارسال کد…</string>
+    <string name="login_verifying">در حال بررسی…</string>
+    <string name="login_secure_note">امن‌شده با استانداردهای بوم</string>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         LOGIN — Errors
+         ═══════════════════════════════════════════════════════════ -->
     <string name="login_error_empty_login">نام کاربری یا شماره همراه را وارد کنید</string>
     <string name="login_error_empty_password">رمز عبور را وارد کنید</string>
-    <string name="login_loading">در حال ورود...</string>
-    <string name="login_sending_code">در حال ارسال کد...</string>
+    <string name="login_error_empty_code">کد ۶ رقمی را وارد کنید</string>
+    <string name="login_error_invalid_credentials">نام کاربری یا رمز عبور اشتباه است</string>
+    <string name="login_error_invalid_code">کد وارد شده اشتباه است</string>
+    <string name="login_error_rate_limit">تعداد تلاش‌ها زیاد است. چند دقیقه بعد دوباره امتحان کنید.</string>
+    <string name="login_error_sms_failed">خطا در ارسال پیامک. لطفاً دوباره تلاش کنید.</string>
+    <string name="login_error_no_user_biometric">بیومتریک برای این کاربر فعال نیست</string>
+    <string name="login_error_biometric_cancelled">ورود بیومتریک لغو شد</string>
+    <string name="login_error_network">اتصال اینترنت خود را بررسی کنید</string>
+    <string name="login_error_server">خطای ارتباط با سرور</string>
+    <string name="login_error_generic">خطایی رخ داد. لطفاً دوباره تلاش کنید</string>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         LOGIN — Info
+         ═══════════════════════════════════════════════════════════ -->
+    <string name="login_info_otp_sent">کد تأیید به %1$s ارسال شد</string>
+    <string name="login_info_generic_sent">اگر اطلاعات وارد شده صحیح باشد، کد تأیید ارسال خواهد شد</string>
+    <string name="login_info_resend_cooldown">ارسال مجدد در %1$d ثانیه</string>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         REGISTER SCREEN
+         ═══════════════════════════════════════════════════════════ -->
+    <string name="register_title">ثبت‌نام</string>
+    <string name="register_step1">اطلاعات حساب</string>
+    <string name="register_step2">شماره همراه</string>
+    <string name="register_step3">تأیید نهایی</string>
+    <string name="register_hint_first_name">نام</string>
+    <string name="register_hint_last_name">نام خانوادگی</string>
+    <string name="register_hint_username">نام کاربری</string>
+    <string name="register_hint_password">رمز عبور</string>
+    <string name="register_hint_confirm_password">تکرار رمز عبور</string>
+    <string name="register_hint_phone">شماره همراه</string>
+    <string name="register_username_help">فقط حروف انگلیسی، عدد و زیرخط</string>
+    <string name="register_password_help">حداقل ۸ کاراکتر با حروف بزرگ/کوچک، عدد و علامت</string>
+    <string name="register_phone_help">مثال: ۰۹۱۲ ۳۴۵ ۶۷۸۹</string>
+    <string name="register_username_checking">در حال بررسی…</string>
+    <string name="register_username_available">قابل استفاده است</string>
+    <string name="register_username_taken">این نام کاربری گرفته شده</string>
+    <string name="register_username_min">حداقل ۳ کاراکتر</string>
+    <string name="register_agree_pre">با</string>
+    <string name="register_terms">قوانین استفاده</string>
+    <string name="register_and">و</string>
+    <string name="register_privacy">حریم خصوصی</string>
+    <string name="register_agree_post">موافقم</string>
+    <string name="register_next">ادامه</string>
+    <string name="register_prev">قبلی</string>
+    <string name="register_send_code">ارسال کد تأیید</string>
+    <string name="register_create_account">تأیید و ایجاد حساب</string>
+    <string name="register_otp_sent_to">کد ارسال شده به</string>
+    <string name="register_loading">در حال ثبت‌نام…</string>
+    <string name="register_creating">در حال ایجاد حساب…</string>
+
+    <!-- REGISTER — Password strength -->
+    <string name="pw_very_weak">خیلی ضعیف</string>
+    <string name="pw_weak">ضعیف</string>
+    <string name="pw_medium">متوسط</string>
+    <string name="pw_good">خوب</string>
+    <string name="pw_strong">قوی</string>
+
+    <!-- REGISTER — Errors -->
+    <string name="register_error_fill_required">همه فیلدهای ضروری را پر کنید</string>
+    <string name="register_error_name_short">نام و نام‌خانوادگی باید حداقل ۲ کاراکتر باشند</string>
+    <string name="register_error_username_format">نام کاربری باید ۳ تا ۵۰ کاراکتر و شامل حروف انگلیسی، اعداد و زیرخط باشد</string>
+    <string name="register_error_username_taken">این نام کاربری قبلاً گرفته شده</string>
+    <string name="register_error_phone_invalid">شماره همراه معتبر وارد کنید (۰۹xxxxxxxxx)</string>
+    <string name="register_error_phone_taken">این شماره همراه قبلاً ثبت شده است</string>
+    <string name="register_error_password_weak">رمز عبور باید حداقل ۸ کاراکتر، شامل حروف بزرگ/کوچک، عدد و کاراکتر خاص باشد</string>
+    <string name="register_error_password_mismatch">رمز عبور و تکرار آن مطابقت ندارند</string>
+    <string name="register_error_accept_terms">پذیرش قوانین و حریم خصوصی الزامی است</string>
+    <string name="register_error_otp_expired">زمان کد به پایان رسیده. دوباره درخواست کنید</string>
+    <string name="register_error_otp_attempts">تعداد تلاش‌ها زیاد شد. دوباره درخواست کنید</string>
+    <string name="register_error_otp_invalid">کد وارد شده صحیح نیست</string>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         FORGOT PASSWORD SCREEN
+         ═══════════════════════════════════════════════════════════ -->
+    <string name="forgot_title">بازیابی رمز عبور</string>
+    <string name="forgot_step1">درخواست کد</string>
+    <string name="forgot_step2">تأیید کد</string>
+    <string name="forgot_step3">رمز جدید</string>
+    <string name="forgot_heading">رمز عبور را فراموش کرده‌اید؟</string>
+    <string name="forgot_sub">نام کاربری یا شماره همراه خود را وارد کنید تا کد بازیابی برایتان ارسال شود</string>
+    <string name="forgot_hint_login">نام کاربری یا شماره همراه</string>
+    <string name="forgot_hint_code">کد ۶ رقمی</string>
+    <string name="forgot_hint_new_password">رمز عبور جدید</string>
+    <string name="forgot_hint_confirm_password">تکرار رمز جدید</string>
+    <string name="forgot_send_code">ارسال کد بازیابی</string>
+    <string name="forgot_verify">تأیید کد</string>
+    <string name="forgot_reset">تغییر رمز عبور</string>
+    <string name="forgot_otp_sent_to">کد ارسال شده به</string>
+    <string name="forgot_loading">در حال ارسال…</string>
+    <string name="forgot_resetting">در حال تغییر رمز…</string>
+    <string name="forgot_success">رمز عبور با موفقیت تغییر کرد. لطفاً دوباره وارد شوید</string>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         SUCCESS SCREEN
+         ═══════════════════════════════════════════════════════════ -->
+    <string name="success_welcome">خوش آمدی!</string>
+    <string name="success_account_created">حساب شما با موفقیت ساخته شد</string>
+    <string name="success_password_changed">رمز عبور شما با موفقیت تغییر کرد</string>
+    <string name="success_redirecting">در حال انتقال…</string>
+    <string name="success_go_dashboard">ورود به داشبورد</string>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         OTP — Common
+         ═══════════════════════════════════════════════════════════ -->
+    <string name="otp_title">کد تأیید را وارد کنید</string>
+    <string name="otp_sub">کد ۶ رقمی ارسال شده به</string>
+    <string name="otp_resend">ارسال مجدد</string>
+    <string name="otp_resend_timer">(%1$d)</string>
+    <string name="otp_back">بازگشت</string>
+    <string name="otp_verify">تأیید</string>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         COMMON / SHARED
+         ═══════════════════════════════════════════════════════════ -->
+    <string name="common_or">یا</string>
+    <string name="common_back">بازگشت</string>
+    <string name="common_next">ادامه</string>
+    <string name="common_cancel">انصراف</string>
+    <string name="common_confirm">تأیید</string>
+    <string name="common_ok">باشه</string>
+    <string name="common_close">بستن</string>
+    <string name="common_retry">تلاش مجدد</string>
+    <string name="common_loading">در حال بارگذاری…</string>
+    <string name="common_error">خطا</string>
+    <string name="common_success">موفق</string>
+    <string name="common_designed_by">طراحی شده توسط</string>
+    <string name="common_agency">آژانس پیکاسو</string>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         THEME + LANGUAGE
+         ═══════════════════════════════════════════════════════════ -->
+    <string name="theme_toggle">تغییر تم</string>
+    <string name="theme_light">روشن</string>
+    <string name="theme_dark">تیره</string>
+    <string name="theme_auto">خودکار</string>
+    <string name="language_toggle">تغییر زبان</string>
+    <string name="language_choose">زبان را انتخاب کنید</string>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         BIOMETRIC PROMPT (نیتیو)
+         ═══════════════════════════════════════════════════════════ -->
+    <string name="biometric_title">ورود بیومتریک</string>
+    <string name="biometric_subtitle">برای ورود، هویت خود را تأیید کنید</string>
+    <string name="biometric_description">از اثر انگشت یا چهره‌ی خود استفاده کنید</string>
+    <string name="biometric_cancel">انصراف</string>
+    <string name="biometric_not_available">دستگاه شما بیومتریک ندارد</string>
+    <string name="biometric_not_enrolled">ابتدا در تنظیمات گوشی، اثر انگشت یا چهره ثبت کنید</string>
+    <string name="biometric_error">خطا در احراز هویت بیومتریک</string>
+    <string name="biometric_lockout">بیومتریک موقتاً قفل شده. با رمز عبور وارد شوید</string>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         LOGOUT
+         ═══════════════════════════════════════════════════════════ -->
+    <string name="logout_title">خروج از حساب</string>
+    <string name="logout_message">آیا مطمئن هستید که می‌خواهید خارج شوید؟</string>
+    <string name="logout_confirm">خروج</string>
+    <string name="logout_cancel">انصراف</string>
 
 </resources>
