@@ -192,6 +192,20 @@
     <string name="biometric_lockout">البصمة مقفلة مؤقتاً. سجّل الدخول بكلمة المرور</string>
 
     <!-- ═══════════════════════════════════════════════════════════
+         ★ BIOMETRIC — Login flow
+         ═══════════════════════════════════════════════════════════ -->
+    <string name="bio_enter_username_first">أدخل اسم المستخدم أو رقم الجوال أولاً</string>
+    <string name="bio_not_enabled_for_user">البصمة غير مُفعّلة لهذا الحساب. سجّل الدخول بكلمة المرور أولاً</string>
+    <string name="bio_auto_login_hint">جارٍ الدخول بالبصمة…</string>
+    <string name="bio_signing_in">جارٍ الدخول…</string>
+    <string name="bio_invalid_key">هذا الجهاز لم يعد صالحاً. سجّل الدخول بكلمة المرور</string>
+    <string name="bio_enable_prompt_title">تفعيل الدخول بالبصمة</string>
+    <string name="bio_enable_prompt_msg">ادخل بشكل أسرع ببصمة الإصبع أو الوجه. هل تريد التفعيل؟</string>
+    <string name="bio_enable_yes">تفعيل</string>
+    <string name="bio_enable_later">لاحقاً</string>
+    <string name="bio_enabled_toast">تم تفعيل الدخول بالبصمة</string>
+
+    <!-- ═══════════════════════════════════════════════════════════
          LOGOUT
          ═══════════════════════════════════════════════════════════ -->
     <string name="logout_title">تسجيل الخروج</string>
