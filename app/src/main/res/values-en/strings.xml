@@ -196,6 +196,20 @@
     <string name="biometric_lockout">Biometric is temporarily locked. Sign in with your password</string>
 
     <!-- ═══════════════════════════════════════════════════════════
+         ★ BIOMETRIC — Login flow
+         ═══════════════════════════════════════════════════════════ -->
+    <string name="bio_enter_username_first">Enter your username or phone first</string>
+    <string name="bio_not_enabled_for_user">Biometric is not enabled for this account. Sign in with password first</string>
+    <string name="bio_auto_login_hint">Signing in biometrically…</string>
+    <string name="bio_signing_in">Signing in…</string>
+    <string name="bio_invalid_key">This device is no longer valid. Please sign in with password</string>
+    <string name="bio_enable_prompt_title">Enable biometric login</string>
+    <string name="bio_enable_prompt_msg">Sign in faster with fingerprint or face. Enable now?</string>
+    <string name="bio_enable_yes">Enable</string>
+    <string name="bio_enable_later">Later</string>
+    <string name="bio_enabled_toast">Biometric login enabled</string>
+
+    <!-- ═══════════════════════════════════════════════════════════
          LOGOUT
          ═══════════════════════════════════════════════════════════ -->
     <string name="logout_title">Sign out</string>
