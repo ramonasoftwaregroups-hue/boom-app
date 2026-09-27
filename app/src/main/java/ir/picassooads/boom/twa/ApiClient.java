@@ -25,8 +25,11 @@ import java.util.concurrent.Executors;
  * ═══════════════════════════════════════════════════════════════
  * ApiClient — ارتباط با panel/api/mobile.php
  * 
- * از HttpURLConnection استفاده می‌کند (بدون کتابخانه‌ی خارجی).
- * همه‌ی متدها async هستند و نتیجه را در callback برمی‌گردانند.
+ * v2 — افزودن متدهای بیومتریک:
+ *   biometricRegister  — فعال‌سازی بیومتریک
+ *   biometricLogin     — ورود با device_key
+ *   biometricStatus    — بررسی وضعیت بیومتریک
+ *   biometricDisable   — غیرفعال‌سازی بیومتریک
  * ═══════════════════════════════════════════════════════════════
  */
 public class ApiClient {
@@ -60,11 +63,6 @@ public class ApiClient {
        CALLBACK
        ═══════════════════════════════════════════════════════════ */
     public interface ApiCallback {
-        /**
-         * @param success آیا درخواست موفق بود
-         * @param response کل پاسخ JSON (در صورت موفقیت یا خطای منطقی)
-         * @param errorMessage پیام خطا (اگر success=false)
-         */
         void onResult(boolean success, JSONObject response, String errorMessage);
     }
 
@@ -94,7 +92,6 @@ public class ApiClient {
                         conn.setRequestProperty("Authorization", "Bearer " + bearerToken);
                     }
 
-                    // نوشتن body
                     String bodyStr = body.toString();
                     try (OutputStream os = conn.getOutputStream()) {
                         os.write(bodyStr.getBytes(StandardCharsets.UTF_8));
@@ -103,7 +100,6 @@ public class ApiClient {
 
                     int httpCode = conn.getResponseCode();
 
-                    // خواندن پاسخ (اگر خطا 500 باشد از errorStream)
                     InputStream is;
                     if (httpCode >= 200 && httpCode < 400) {
                         is = conn.getInputStream();
@@ -206,17 +202,14 @@ public class ApiClient {
     }
 
     private String getFingerprint() {
-        // یک شناسه‌ی سبک از مشخصات دستگاه — نه کامل ولی کافی
         return Build.MANUFACTURER + "/" + Build.MODEL + "/" + Build.DEVICE;
     }
 
     /* ═══════════════════════════════════════════════════════════
-       ═══════════════════════════════════════════════════════════
        PUBLIC METHODS — اکشن‌های API
-       ═══════════════════════════════════════════════════════════
        ═══════════════════════════════════════════════════════════ */
 
-    /** PING — تست سلامت API */
+    /** PING */
     public void ping(ApiCallback callback) {
         try {
             JSONObject body = new JSONObject();
@@ -227,9 +220,7 @@ public class ApiClient {
         }
     }
 
-    /* ─────────────────────────────────────────────
-       ۱) ورود با رمز عبور
-       ───────────────────────────────────────────── */
+    /* ۱) ورود با رمز عبور */
     public void loginWithPassword(String login, String password, ApiCallback callback) {
         try {
             JSONObject body = new JSONObject();
@@ -242,9 +233,7 @@ public class ApiClient {
         }
     }
 
-    /* ─────────────────────────────────────────────
-       ۲) درخواست کد OTP برای ورود
-       ───────────────────────────────────────────── */
+    /* ۲) درخواست کد OTP */
     public void loginRequestOtp(String login, ApiCallback callback) {
         try {
             JSONObject body = new JSONObject();
@@ -256,9 +245,7 @@ public class ApiClient {
         }
     }
 
-    /* ─────────────────────────────────────────────
-       ۳) تأیید کد OTP
-       ───────────────────────────────────────────── */
+    /* ۳) تأیید کد OTP */
     public void loginVerifyOtp(String otpToken, String code, ApiCallback callback) {
         try {
             JSONObject body = new JSONObject();
@@ -271,9 +258,7 @@ public class ApiClient {
         }
     }
 
-    /* ─────────────────────────────────────────────
-       ۴) بررسی نام کاربری
-       ───────────────────────────────────────────── */
+    /* ۴) بررسی نام کاربری */
     public void checkUsername(String username, ApiCallback callback) {
         try {
             JSONObject body = new JSONObject();
@@ -285,9 +270,7 @@ public class ApiClient {
         }
     }
 
-    /* ─────────────────────────────────────────────
-       ۵) ثبت‌نام — درخواست کد
-       ───────────────────────────────────────────── */
+    /* ۵) ثبت‌نام — درخواست کد */
     public void registerRequestOtp(String firstName,
                                    String lastName,
                                    String username,
@@ -310,9 +293,7 @@ public class ApiClient {
         }
     }
 
-    /* ─────────────────────────────────────────────
-       ۶) ثبت‌نام — تأیید کد
-       ───────────────────────────────────────────── */
+    /* ۶) ثبت‌نام — تأیید کد */
     public void registerVerifyOtp(String otpToken, String code, ApiCallback callback) {
         try {
             JSONObject body = new JSONObject();
@@ -325,9 +306,7 @@ public class ApiClient {
         }
     }
 
-    /* ─────────────────────────────────────────────
-       ۷) فراموشی رمز — درخواست کد
-       ───────────────────────────────────────────── */
+    /* ۷) فراموشی رمز — درخواست کد */
     public void forgotRequestOtp(String login, ApiCallback callback) {
         try {
             JSONObject body = new JSONObject();
@@ -339,9 +318,7 @@ public class ApiClient {
         }
     }
 
-    /* ─────────────────────────────────────────────
-       ۸) فراموشی رمز — تأیید کد
-       ───────────────────────────────────────────── */
+    /* ۸) فراموشی رمز — تأیید کد */
     public void forgotVerifyOtp(String otpToken, String code, ApiCallback callback) {
         try {
             JSONObject body = new JSONObject();
@@ -354,9 +331,7 @@ public class ApiClient {
         }
     }
 
-    /* ─────────────────────────────────────────────
-       ۹) فراموشی رمز — تنظیم رمز جدید
-       ───────────────────────────────────────────── */
+    /* ۹) فراموشی رمز — تنظیم رمز جدید */
     public void forgotReset(String resetToken, String password, String passwordConfirm, ApiCallback callback) {
         try {
             JSONObject body = new JSONObject();
@@ -370,9 +345,7 @@ public class ApiClient {
         }
     }
 
-    /* ─────────────────────────────────────────────
-       ۱۰) ME — اطلاعات کاربر فعلی
-       ───────────────────────────────────────────── */
+    /* ۱۰) ME */
     public void me(String token, ApiCallback callback) {
         try {
             JSONObject body = new JSONObject();
@@ -383,9 +356,7 @@ public class ApiClient {
         }
     }
 
-    /* ─────────────────────────────────────────────
-       ۱۱) REFRESH TOKEN
-       ───────────────────────────────────────────── */
+    /* ۱۱) REFRESH TOKEN */
     public void refreshToken(String token, ApiCallback callback) {
         try {
             JSONObject body = new JSONObject();
@@ -396,9 +367,7 @@ public class ApiClient {
         }
     }
 
-    /* ─────────────────────────────────────────────
-       ۱۲) LOGOUT
-       ───────────────────────────────────────────── */
+    /* ۱۲) LOGOUT */
     public void logout(String token, boolean allDevices, ApiCallback callback) {
         try {
             JSONObject body = new JSONObject();
@@ -411,10 +380,74 @@ public class ApiClient {
     }
 
     /* ═══════════════════════════════════════════════════════════
-       HELPERS — استخراج اطلاعات از پاسخ
+       ★★ BIOMETRIC — متدهای ورود بیومتریک
        ═══════════════════════════════════════════════════════════ */
 
-    /** استخراج پیام خطا از پاسخ */
+    /* ۱۳) فعال‌سازی بیومتریک
+       
+       ورودی: deviceToken (توکن اصلی دستگاه از ورود موفق)
+       خروجی: device_key یکتا + device_key_id
+     */
+    public void biometricRegister(String deviceToken, ApiCallback callback) {
+        try {
+            JSONObject body = new JSONObject();
+            body.put("action", "biometric_register");
+            body.put("device_name", getDeviceName());
+            post(body, deviceToken, callback);
+        } catch (JSONException e) {
+            finalError(callback, "خطای ساخت درخواست");
+        }
+    }
+
+    /* ۱۴) ورود با device_key
+       
+       ورودی: deviceKey (که در Keystore ذخیره شده)
+       خروجی: توکن جدید + اطلاعات کاربر
+     */
+    public void biometricLogin(String deviceKey, ApiCallback callback) {
+        try {
+            JSONObject body = new JSONObject();
+            body.put("action", "biometric_login");
+            body.put("device_key", deviceKey);
+            post(body, null, callback);
+        } catch (JSONException e) {
+            finalError(callback, "خطای ساخت درخواست");
+        }
+    }
+
+    /* ۱۵) بررسی وضعیت بیومتریک */
+    public void biometricStatus(String token, ApiCallback callback) {
+        try {
+            JSONObject body = new JSONObject();
+            body.put("action", "biometric_status");
+            post(body, token, callback);
+        } catch (JSONException e) {
+            finalError(callback, "خطای ساخت درخواست");
+        }
+    }
+
+    /* ۱۶) غیرفعال‌سازی بیومتریک
+       
+       deviceKey خالی → غیرفعال‌سازی همه‌ی دستگاه‌ها
+       deviceKey مقدار → غیرفعال‌سازی همان دستگاه
+     */
+    public void biometricDisable(String token, String deviceKey, ApiCallback callback) {
+        try {
+            JSONObject body = new JSONObject();
+            body.put("action", "biometric_disable");
+            if (deviceKey != null && !deviceKey.isEmpty()) {
+                body.put("device_key", deviceKey);
+            }
+            post(body, token, callback);
+        } catch (JSONException e) {
+            finalError(callback, "خطای ساخت درخواست");
+        }
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       HELPERS
+       ═══════════════════════════════════════════════════════════ */
+
     public static String getErrorMessage(JSONObject response, String fallback) {
         if (response == null) return fallback;
         String msg = response.optString("error", "");
@@ -423,7 +456,6 @@ public class ApiClient {
         return msg;
     }
 
-    /** ساخت یک رشته‌ی نمایشی از JSON (برای debug) */
     public static String prettyPrint(JSONObject json) {
         if (json == null) return "null";
         try {
