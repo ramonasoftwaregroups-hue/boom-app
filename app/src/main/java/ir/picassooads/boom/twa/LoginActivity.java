@@ -1,6 +1,7 @@
 package ir.picassooads.boom.twa;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
@@ -20,6 +21,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.biometric.BiometricManager;
 import androidx.biometric.BiometricPrompt;
@@ -38,16 +40,25 @@ import java.util.concurrent.Executor;
  * ═══════════════════════════════════════════════════════════════
  * LoginActivity — صفحه‌ی ورود نیتیو
  * 
- * v6 — اصلاحات:
- *   • لوگوی BOOM از drawable محلی (بدون وقفه)
- *   • لوگوی BOOM فقط در دارک مود سفید می‌شود (در لایت مود رنگی می‌ماند)
- *   • لوگوی Picasso در فوتر از drawable محلی
- *   • پیام بیومتریک موفق اصلاح شد
+ * v7 — منطق کامل بیومتریک:
+ *   • Auto-fill username از بار قبل
+ *   • Auto-trigger بیومتریک اگر username پر بود و بیومتریک فعال
+ *   • دکمه بیومتریک با چک‌های کامل:
+ *       - بدون username → پیام
+ *       - بدون device_key → پیام «فعال نیست»
+ *       - با device_key → BiometricPrompt → سرور → ورود
+ *   • بعد از ورود با رمز/OTP:
+ *       - اگر بیومتریک فعال نیست → دیالوگ «فعال کن؟»
+ *       - اگر بله → BiometricPrompt → سرور → ذخیره device_key
+ *   • ذخیره‌ی جداگانه‌ی زبان/تم از سرور
  * ═══════════════════════════════════════════════════════════════
  */
 public class LoginActivity extends AppCompatActivity {
 
     private static final String TAG = "LoginActivity";
+
+    private static final String PREFS_LOCAL       = "boom_prefs";
+    private static final String KEY_LAST_USERNAME = "last_username";
 
     /* Views */
     private TabLayout loginTabs;
@@ -63,6 +74,7 @@ public class LoginActivity extends AppCompatActivity {
     /* State */
     private ApiClient api;
     private SessionManager session;
+    private BiometricStorage bioStorage;
     private String currentLang;
     private String currentOtpToken = "";
     private boolean otpSent = false;
@@ -71,9 +83,15 @@ public class LoginActivity extends AppCompatActivity {
     /* Biometric */
     private BiometricPrompt biometricPrompt;
     private BiometricPrompt.PromptInfo biometricPromptInfo;
+    private enum BioMode { LOGIN, ENABLE, DISABLED }
+    private BioMode pendingBioMode = BioMode.DISABLED;
+    private String pendingLoginUsername = "";
+    private String pendingToken = "";
+    private String pendingFullName = "";
+    private int pendingUserId = 0;
 
     /* ═══════════════════════════════════════════════════════════
-       attachBaseContext — اعمال زبان روی کل Activity
+       attachBaseContext
        ═══════════════════════════════════════════════════════════ */
     @Override
     protected void attachBaseContext(Context newBase) {
@@ -84,27 +102,20 @@ public class LoginActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        // ★ اعمال تم قبل از super
         ThemeHelper.applySavedMode(this);
-
         super.onCreate(savedInstanceState);
 
-        // ★ زبان فعلی
         currentLang = LocaleHelper.getLanguage(this);
 
-        // ★ سشن قبلی را پاک کن
         session = new SessionManager(this);
-        if (session.isLoggedIn()) {
-            session.clear();
-        }
+        if (session.isLoggedIn()) session.clear();
 
-        // ★ کوکی‌های WebView را پاک کن
+        bioStorage = new BiometricStorage(this);
+
         try {
             CookieManager.getInstance().removeAllCookies(null);
             CookieManager.getInstance().flush();
-        } catch (Exception e) {
-            Log.w(TAG, "Failed to clear cookies", e);
-        }
+        } catch (Exception e) { Log.w(TAG, "clear cookies", e); }
 
         setContentView(R.layout.activity_login);
 
@@ -118,24 +129,17 @@ public class LoginActivity extends AppCompatActivity {
         setupOtpBoxes();
         setupBiometric();
 
-        // اعمال فونت
         LocaleHelper.applyFontToViewTree(this,
                 findViewById(R.id.loginRoot), currentLang);
 
-        // به‌روزرسانی دکمه‌ی زبان
         langCode.setText(currentLang.toUpperCase());
-
-        // به‌روزرسانی آیکون تم
         updateThemeIcon();
-
-        // ★ لود لوگوی BOOM از drawable (با چک تم)
         loadBrandLogo();
-
-        // ★ لود لوگوی Picasso در فوتر از drawable
         loadPicassoFooter();
 
-        // ★ پر کردن username قبلی
+        // ★ پر کردن username و auto-trigger بیومتریک
         restoreSavedUsername();
+        maybeAutoBiometric();
     }
 
     /* ═══════════════════════════════════════════════════════════
@@ -175,15 +179,13 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     /* ═══════════════════════════════════════════════════════════
-       TOP ACTIONS — Theme + Language
+       TOP ACTIONS
        ═══════════════════════════════════════════════════════════ */
     private void setupTopActions() {
         themeBtn.setOnClickListener(v -> {
-            // ★ تغییر تم + recreate فوری
             ThemeHelper.toggleLightDark(this);
             updateThemeIcon();
         });
-
         langBtn.setOnClickListener(v -> showLanguageDialog());
     }
 
@@ -192,22 +194,17 @@ public class LoginActivity extends AppCompatActivity {
         themeIcon.setImageResource(dark ? R.drawable.ic_sun : R.drawable.ic_moon);
     }
 
-    /* ═══════════════════════════════════════════════════════════
-       showLanguageDialog — تغییر زبان با forceLocale
-       ═══════════════════════════════════════════════════════════ */
     private void showLanguageDialog() {
         final String[] names = {
                 "فارسی", "العربية", "English", "Français", "Italiano", "Deutsch"
         };
         final String[] codes = LocaleHelper.SUPPORTED;
 
-        new androidx.appcompat.app.AlertDialog.Builder(this,
-                R.style.BoomDialogTheme)
+        new AlertDialog.Builder(this, R.style.BoomDialogTheme)
                 .setTitle(R.string.language_choose)
-                .setItems(names, (dialog, which) -> {
+                .setItems(names, (d, which) -> {
                     String lang = codes[which];
                     if (lang.equals(currentLang)) return;
-
                     LocaleHelper.saveLanguage(this, lang);
                     LocaleHelper.forceLocale(this, lang);
                     recreate();
@@ -216,7 +213,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     /* ═══════════════════════════════════════════════════════════
-       BIOMETRIC — BiometricPrompt نیتیو
+       BIOMETRIC — Setup
        ═══════════════════════════════════════════════════════════ */
     private void setupBiometric() {
         Executor executor = ContextCompat.getMainExecutor(this);
@@ -226,60 +223,118 @@ public class LoginActivity extends AppCompatActivity {
                     @Override
                     public void onAuthenticationError(int errorCode, @NonNull CharSequence errString) {
                         super.onAuthenticationError(errorCode, errString);
-                        Log.w(TAG, "Biometric error " + errorCode + ": " + errString);
+                        Log.w(TAG, "Bio error " + errorCode + ": " + errString);
+
                         if (errorCode == BiometricPrompt.ERROR_USER_CANCELED
                                 || errorCode == BiometricPrompt.ERROR_NEGATIVE_BUTTON
                                 || errorCode == BiometricPrompt.ERROR_CANCELED) {
+                            // لغو شد
+                            if (pendingBioMode == BioMode.ENABLE) {
+                                // کاربر لغو کرد → ورود عادی ادامه
+                                pendingBioMode = BioMode.DISABLED;
+                                proceedAfterLogin();
+                            }
                             return;
                         }
-                        Toast.makeText(LoginActivity.this,
-                                errString, Toast.LENGTH_SHORT).show();
+                        // خطای دیگر
+                        if (pendingBioMode == BioMode.LOGIN) {
+                            showError(getString(R.string.biometric_error));
+                        } else if (pendingBioMode == BioMode.ENABLE) {
+                            pendingBioMode = BioMode.DISABLED;
+                            proceedAfterLogin();
+                        }
+                        pendingBioMode = BioMode.DISABLED;
                     }
 
                     @Override
                     public void onAuthenticationSucceeded(@NonNull BiometricPrompt.AuthenticationResult result) {
                         super.onAuthenticationSucceeded(result);
-                        Log.d(TAG, "Biometric auth succeeded");
-                        onBiometricSuccess();
+                        Log.d(TAG, "Bio success, mode=" + pendingBioMode);
+
+                        if (pendingBioMode == BioMode.LOGIN) {
+                            performBiometricServerLogin();
+                        } else if (pendingBioMode == BioMode.ENABLE) {
+                            performBiometricServerRegister();
+                        }
                     }
 
                     @Override
                     public void onAuthenticationFailed() {
                         super.onAuthenticationFailed();
-                        Log.d(TAG, "Biometric auth failed (retry)");
+                        Log.d(TAG, "Bio failed (retry)");
                     }
                 });
     }
 
-    private void onBiometric() {
+    /* ═══════════════════════════════════════════════════════════
+       BIOMETRIC — چک پشتیبانی
+       ═══════════════════════════════════════════════════════════ */
+    private boolean isBiometricSupported() {
         BiometricManager bm = BiometricManager.from(this);
         int canAuth = bm.canAuthenticate(
                 BiometricManager.Authenticators.BIOMETRIC_STRONG
                         | BiometricManager.Authenticators.BIOMETRIC_WEAK);
+        return canAuth == BiometricManager.BIOMETRIC_SUCCESS;
+    }
 
-        if (canAuth != BiometricManager.BIOMETRIC_SUCCESS) {
-            String msg;
-            switch (canAuth) {
-                case BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE:
-                    msg = getString(R.string.biometric_not_available);
-                    break;
-                case BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE:
-                    msg = getString(R.string.biometric_error);
-                    break;
-                case BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED:
-                    msg = getString(R.string.biometric_not_enrolled);
-                    break;
-                default:
-                    msg = getString(R.string.biometric_not_available);
-            }
-            Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
+    private String getBiometricUnavailableMessage(int canAuth) {
+        switch (canAuth) {
+            case BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE:
+                return getString(R.string.biometric_not_available);
+            case BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE:
+                return getString(R.string.biometric_error);
+            case BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED:
+                return getString(R.string.biometric_not_enrolled);
+            default:
+                return getString(R.string.biometric_not_available);
+        }
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       BIOMETRIC — دکمه (کلیک دستی)
+       ═══════════════════════════════════════════════════════════ */
+    private void onBiometric() {
+        // ۱) چک پشتیبانی
+        if (!isBiometricSupported()) {
+            int canAuth = BiometricManager.from(this).canAuthenticate(
+                    BiometricManager.Authenticators.BIOMETRIC_STRONG
+                            | BiometricManager.Authenticators.BIOMETRIC_WEAK);
+            Toast.makeText(this, getBiometricUnavailableMessage(canAuth),
+                    Toast.LENGTH_LONG).show();
             return;
         }
 
+        // ۲) چک username
+        String username = text(loginInput);
+        if (username.isEmpty()) {
+            showError(getString(R.string.bio_enter_username_first));
+            loginInput.requestFocus();
+            return;
+        }
+
+        // ۳) چک فعال بودن بیومتریک برای این کاربر
+        if (!bioStorage.isEnabledFor(username)) {
+            // username هست ولی بیومتریک قبلاً فعال نشده
+            showError(getString(R.string.bio_not_enabled_for_user));
+            return;
+        }
+
+        // ۴) همه‌چیز OK → prompt
+        pendingBioMode = BioMode.LOGIN;
+        pendingLoginUsername = username;
+        showBiometricPrompt(
+                getString(R.string.biometric_title),
+                getString(R.string.biometric_subtitle)
+        );
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       BIOMETRIC — نمایش Prompt
+       ═══════════════════════════════════════════════════════════ */
+    private void showBiometricPrompt(String title, String subtitle) {
         biometricPromptInfo = new BiometricPrompt.PromptInfo.Builder()
-                .setTitle(getString(R.string.biometric_title))
-                .setSubtitle(getString(R.string.biometric_subtitle))
-                .setDescription(getString(R.string.biometric_description))
+                .setTitle(title)
+                .setSubtitle(subtitle)
                 .setNegativeButtonText(getString(R.string.biometric_cancel))
                 .setAllowedAuthenticators(
                         BiometricManager.Authenticators.BIOMETRIC_STRONG
@@ -292,23 +347,99 @@ public class LoginActivity extends AppCompatActivity {
         } catch (Exception e) {
             Log.e(TAG, "authenticate failed", e);
             Toast.makeText(this, R.string.biometric_error, Toast.LENGTH_SHORT).show();
+            pendingBioMode = BioMode.DISABLED;
         }
     }
 
     /* ═══════════════════════════════════════════════════════════
-       ★ BIOMETRIC SUCCESS — پیام درست
-       
-       فعلاً فقط پیام موفقیت نشان می‌دهد.
-       در مرحله‌ی بعد، با سرور یک endpoint بیومتریک می‌سازیم.
+       BIOMETRIC — auto-trigger هنگام باز شدن
        ═══════════════════════════════════════════════════════════ */
-    private void onBiometricSuccess() {
-        // ★ پیام موفقیت
-        Toast.makeText(this,
-                getString(R.string.biometric_title) + " ✓",
-                Toast.LENGTH_SHORT).show();
+    private void maybeAutoBiometric() {
+        String username = text(loginInput);
+        if (username.isEmpty()) return;
+        if (!bioStorage.isEnabledFor(username)) return;
+        if (!isBiometricSupported()) return;
 
-        // ★ فعلاً کاربر را وارد نمی‌کنیم چون endpoint بیومتریک نداریم
-        // در مرحله‌ی بعد، توکن را از سرور با device_id می‌گیریم
+        // کمی تأخیر تا صفحه انیمیشنش تمام شود
+        loginInput.postDelayed(() -> {
+            if (isFinishing()) return;
+            pendingBioMode = BioMode.LOGIN;
+            pendingLoginUsername = username;
+            showBiometricPrompt(
+                    getString(R.string.biometric_title),
+                    getString(R.string.bio_auto_login_hint)
+            );
+        }, 600);
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       BIOMETRIC — درخواست ورود با device_key
+       ═══════════════════════════════════════════════════════════ */
+    private void performBiometricServerLogin() {
+        String deviceKey = bioStorage.getDeviceKey();
+        if (deviceKey == null || deviceKey.isEmpty()) {
+            bioStorage.clear();
+            showError(getString(R.string.bio_not_enabled_for_user));
+            pendingBioMode = BioMode.DISABLED;
+            return;
+        }
+
+        setLoading(loginBtn, true, getString(R.string.bio_signing_in));
+        hideError();
+
+        api.biometricLogin(deviceKey, new ApiClient.ApiCallback() {
+            @Override
+            public void onResult(boolean success, JSONObject response, String errorMessage) {
+                setLoading(loginBtn, false, getString(R.string.login_button));
+                pendingBioMode = BioMode.DISABLED;
+
+                if (!success || response == null) {
+                    // device_key نامعتبر → پاکش کن
+                    bioStorage.clear();
+                    showError(errorMessage != null ? errorMessage
+                            : getString(R.string.bio_invalid_key));
+                    return;
+                }
+                // ورود موفق
+                handleLoginSuccess(response);
+            }
+        });
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       BIOMETRIC — درخواست فعال‌سازی روی سرور
+       ═══════════════════════════════════════════════════════════ */
+    private void performBiometricServerRegister() {
+        if (pendingToken.isEmpty() || pendingLoginUsername.isEmpty()) {
+            pendingBioMode = BioMode.DISABLED;
+            proceedAfterLogin();
+            return;
+        }
+
+        api.biometricRegister(pendingToken, new ApiClient.ApiCallback() {
+            @Override
+            public void onResult(boolean success, JSONObject response, String errorMessage) {
+                if (success && response != null) {
+                    String deviceKey = response.optString("device_key", "");
+                    if (!deviceKey.isEmpty()) {
+                        bioStorage.save(
+                                deviceKey,
+                                pendingLoginUsername,
+                                pendingUserId,
+                                android.os.Build.MODEL
+                        );
+                        Toast.makeText(LoginActivity.this,
+                                R.string.bio_enabled_toast,
+                                Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    // شکست سرور → بی‌سروصدا رد شو
+                    Log.w(TAG, "biometric_register failed: " + errorMessage);
+                }
+                pendingBioMode = BioMode.DISABLED;
+                proceedAfterLogin();
+            }
+        });
     }
 
     /* ═══════════════════════════════════════════════════════════
@@ -328,7 +459,6 @@ public class LoginActivity extends AppCompatActivity {
                 }
                 hideError();
             }
-
             @Override public void onTabUnselected(TabLayout.Tab tab) {}
             @Override public void onTabReselected(TabLayout.Tab tab) {}
         });
@@ -345,7 +475,6 @@ public class LoginActivity extends AppCompatActivity {
             }
             @Override public void afterTextChanged(Editable s) {}
         };
-
         loginInput.addTextChangedListener(clearError);
         passwordInput.addTextChangedListener(clearError);
     }
@@ -370,13 +499,11 @@ public class LoginActivity extends AppCompatActivity {
         });
 
         forgotBtn.setOnClickListener(v -> {
-            Intent i = new Intent(LoginActivity.this, ForgotPasswordActivity.class);
-            startActivity(i);
+            startActivity(new Intent(LoginActivity.this, ForgotPasswordActivity.class));
         });
 
         registerCta.setOnClickListener(v -> {
-            Intent i = new Intent(LoginActivity.this, RegisterActivity.class);
-            startActivity(i);
+            startActivity(new Intent(LoginActivity.this, RegisterActivity.class));
         });
 
         biometricBtn.setOnClickListener(v -> onBiometric());
@@ -394,13 +521,10 @@ public class LoginActivity extends AppCompatActivity {
                     if (s.length() == 1 && idx < otpBoxes.length - 1) {
                         otpBoxes[idx + 1].requestFocus();
                     }
-                    if (getOtpCode().length() == 6 && otpSent) {
-                        doVerifyOtp();
-                    }
+                    if (getOtpCode().length() == 6 && otpSent) doVerifyOtp();
                 }
                 @Override public void afterTextChanged(Editable s) {}
             });
-
             otpBoxes[i].setOnKeyListener((view, keyCode, event) -> {
                 if (keyCode == android.view.KeyEvent.KEYCODE_DEL
                         && event.getAction() == android.view.KeyEvent.ACTION_DOWN
@@ -417,9 +541,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private String getOtpCode() {
         StringBuilder sb = new StringBuilder();
-        for (EditText e : otpBoxes) {
-            sb.append(e.getText().toString());
-        }
+        for (EditText e : otpBoxes) sb.append(e.getText().toString());
         return sb.toString();
     }
 
@@ -435,14 +557,8 @@ public class LoginActivity extends AppCompatActivity {
         String login = text(loginInput);
         String pass = text(passwordInput);
 
-        if (login.isEmpty()) {
-            showError(getString(R.string.login_error_empty_login));
-            return;
-        }
-        if (pass.isEmpty()) {
-            showError(getString(R.string.login_error_empty_password));
-            return;
-        }
+        if (login.isEmpty()) { showError(getString(R.string.login_error_empty_login)); return; }
+        if (pass.isEmpty())  { showError(getString(R.string.login_error_empty_password)); return; }
 
         setLoading(loginBtn, true, getString(R.string.login_loading));
         hideError();
@@ -452,8 +568,8 @@ public class LoginActivity extends AppCompatActivity {
             public void onResult(boolean success, JSONObject response, String errorMessage) {
                 setLoading(loginBtn, false, getString(R.string.login_button));
                 if (!success || response == null) {
-                    showError(errorMessage != null ? errorMessage :
-                            getString(R.string.login_error_invalid_credentials));
+                    showError(errorMessage != null ? errorMessage
+                            : getString(R.string.login_error_invalid_credentials));
                     return;
                 }
                 handleLoginSuccess(response);
@@ -462,15 +578,11 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     /* ═══════════════════════════════════════════════════════════
-       OTP — Request code
+       OTP
        ═══════════════════════════════════════════════════════════ */
     private void doRequestOtp() {
         String login = text(loginInput);
-
-        if (login.isEmpty()) {
-            showError(getString(R.string.login_error_empty_login));
-            return;
-        }
+        if (login.isEmpty()) { showError(getString(R.string.login_error_empty_login)); return; }
 
         setLoading(verifyOtpBtn, true, getString(R.string.login_sending_code));
         hideError();
@@ -482,32 +594,25 @@ public class LoginActivity extends AppCompatActivity {
                         otpSent ? getString(R.string.login_verify)
                                 : getString(R.string.login_send_code));
                 if (!success || response == null) {
-                    showError(errorMessage != null ? errorMessage :
-                            getString(R.string.login_error_sms_failed));
+                    showError(errorMessage != null ? errorMessage
+                            : getString(R.string.login_error_sms_failed));
                     return;
                 }
-
                 currentOtpToken = response.optString("otp_token", "");
                 if (currentOtpToken.isEmpty()) {
                     showError(getString(R.string.login_info_generic_sent));
                     return;
                 }
-
                 otpSent = true;
                 String masked = response.optString("phone_masked", "");
                 otpSub.setText(getString(R.string.login_info_otp_sent, masked));
-
                 verifyOtpBtn.setText(R.string.login_verify);
-
                 clearOtpBoxes();
                 startResendCooldown(60);
             }
         });
     }
 
-    /* ═══════════════════════════════════════════════════════════
-       OTP — Verify code
-       ═══════════════════════════════════════════════════════════ */
     private void doVerifyOtp() {
         String code = getOtpCode();
         if (code.length() != 6) {
@@ -523,8 +628,8 @@ public class LoginActivity extends AppCompatActivity {
             public void onResult(boolean success, JSONObject response, String errorMessage) {
                 setLoading(verifyOtpBtn, false, getString(R.string.login_verify));
                 if (!success || response == null) {
-                    showError(errorMessage != null ? errorMessage :
-                            getString(R.string.login_error_invalid_code));
+                    showError(errorMessage != null ? errorMessage
+                            : getString(R.string.login_error_invalid_code));
                     clearOtpBoxes();
                     return;
                 }
@@ -533,13 +638,9 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    /* ═══════════════════════════════════════════════════════════
-       RESEND COOLDOWN
-       ═══════════════════════════════════════════════════════════ */
     private void startResendCooldown(int seconds) {
         if (resendTimer != null) resendTimer.cancel();
         resendBtn.setEnabled(false);
-
         resendTimer = new CountDownTimer(seconds * 1000L, 1000) {
             @Override public void onTick(long ms) {
                 int left = (int) (ms / 1000);
@@ -553,7 +654,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     /* ═══════════════════════════════════════════════════════════
-       LOGIN SUCCESS
+       LOGIN SUCCESS — با چک بیومتریک
        ═══════════════════════════════════════════════════════════ */
     private void handleLoginSuccess(JSONObject response) {
         try {
@@ -568,46 +669,58 @@ public class LoginActivity extends AppCompatActivity {
 
             int userId = user.optInt("id", 0);
             String username = user.optString("username", "");
-            String firstName = user.optString("first_name", "");
-            String lastName = user.optString("last_name", "");
             String fullName = user.optString("full_name", "");
-            String phone = user.optString("phone", "");
-            String email = user.optString("email", "");
-
             String lang = user.optString("language", currentLang);
             String theme = user.optString("theme", "auto");
 
+            // ★ ذخیره‌ی جداگانه‌ی زبان و تم از سرور
             if (LocaleHelper.isValid(lang)) {
-                LocaleHelper.saveLanguage(this, lang);
+                LocaleHelper.saveUserLanguage(this, lang);
                 LocaleHelper.forceLocale(this, lang);
             }
-
             if (theme != null && !theme.isEmpty()) {
                 ThemeHelper.saveUserTheme(this, theme);
             }
 
+            // ★ ذخیره‌ی username برای auto-fill
             if (!username.isEmpty()) {
                 try {
-                    getSharedPreferences("boom_prefs", MODE_PRIVATE)
-                        .edit()
-                        .putString("last_username", username)
-                        .apply();
+                    getSharedPreferences(PREFS_LOCAL, MODE_PRIVATE)
+                            .edit()
+                            .putString(KEY_LAST_USERNAME, username)
+                            .apply();
                 } catch (Exception ignored) {}
             }
 
-            Toast.makeText(this,
-                    getString(R.string.success_welcome) + " " + fullName,
-                    Toast.LENGTH_SHORT).show();
+            // ★ اطلاعات برای ادامه‌ی جریان
+            pendingToken = token;
+            pendingFullName = fullName;
+            pendingUserId = userId;
+            pendingLoginUsername = username;
 
-            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-            intent.putExtra("session_token", token);
-            intent.putExtra("user_id", userId);
-            intent.putExtra("user_full_name", fullName);
-            intent.putExtra("user_language", lang);
-            intent.putExtra("user_theme", theme);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
-            finish();
+            // ★ آیا بیومتریک از سرور آمده؟
+            boolean serverHasBio = response.optBoolean("biometric_enabled", false);
+            boolean localHasBio = bioStorage.isEnabledFor(username);
+
+            // اگر سرور می‌گوید کاربر بیومتریک دارد ولی ما محلی نداریم (مثلاً دستگاه جدید):
+            // نیازی به فعال‌سازی نیست، مستقیم برو
+            if (serverHasBio && !localHasBio) {
+                proceedAfterLogin();
+                return;
+            }
+
+            // اگر محلی داریم → برو (بیومتریک قبلاً فعال شده)
+            if (localHasBio) {
+                proceedAfterLogin();
+                return;
+            }
+
+            // ★ بیومتریک فعال نیست → دیالوگ فعال‌سازی
+            if (isBiometricSupported()) {
+                askEnableBiometric();
+            } else {
+                proceedAfterLogin();
+            }
 
         } catch (Exception e) {
             Log.e(TAG, "handleLoginSuccess", e);
@@ -616,12 +729,53 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     /* ═══════════════════════════════════════════════════════════
+       ASK ENABLE — دیالوگ فعال‌سازی بیومتریک
+       ═══════════════════════════════════════════════════════════ */
+    private void askEnableBiometric() {
+        new AlertDialog.Builder(this, R.style.BoomDialogTheme)
+                .setTitle(R.string.bio_enable_prompt_title)
+                .setMessage(R.string.bio_enable_prompt_msg)
+                .setCancelable(false)
+                .setPositiveButton(R.string.bio_enable_yes, (d, w) -> {
+                    pendingBioMode = BioMode.ENABLE;
+                    showBiometricPrompt(
+                            getString(R.string.bio_enable_prompt_title),
+                            getString(R.string.bio_enable_prompt_msg)
+                    );
+                })
+                .setNegativeButton(R.string.bio_enable_later, (d, w) -> {
+                    pendingBioMode = BioMode.DISABLED;
+                    proceedAfterLogin();
+                })
+                .show();
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       PROCEED — رفتن به MainActivity
+       ═══════════════════════════════════════════════════════════ */
+    private void proceedAfterLogin() {
+        if (pendingToken.isEmpty()) return;
+
+        Toast.makeText(this,
+                getString(R.string.success_welcome) + " " + pendingFullName,
+                Toast.LENGTH_SHORT).show();
+
+        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+        intent.putExtra("session_token", pendingToken);
+        intent.putExtra("user_id", pendingUserId);
+        intent.putExtra("user_full_name", pendingFullName);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
+    }
+
+    /* ═══════════════════════════════════════════════════════════
        RESTORE SAVED USERNAME
        ═══════════════════════════════════════════════════════════ */
     private void restoreSavedUsername() {
         try {
-            String lastUsername = getSharedPreferences("boom_prefs", MODE_PRIVATE)
-                    .getString("last_username", "");
+            String lastUsername = getSharedPreferences(PREFS_LOCAL, MODE_PRIVATE)
+                    .getString(KEY_LAST_USERNAME, "");
             if (lastUsername != null && !lastUsername.isEmpty() && loginInput != null) {
                 loginInput.setText(lastUsername);
                 if (loginInput.getText() != null) {
@@ -632,36 +786,22 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     /* ═══════════════════════════════════════════════════════════
-       ★ LOAD BRAND LOGO از drawable محلی
-       
-       ★ نکته: در لایت مود لوگو رنگی می‌ماند، در دارک مود سفید می‌شود
+       LOAD LOGOS
        ═══════════════════════════════════════════════════════════ */
     private void loadBrandLogo() {
         if (brandLogo == null) return;
-
-        // ★ چک تم فعلی
         boolean isDark = ThemeHelper.isDark(this);
-
         if (isDark) {
-            // در دارک مود → سفید کن
             brandLogo.setColorFilter(
                     new PorterDuffColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN));
         } else {
-            // در لایت مود → رنگی (بدون فیلتر)
             brandLogo.clearColorFilter();
         }
-
-        // ★ لود از drawable — بدون وقفه
         brandLogo.setImageResource(R.drawable.boom);
     }
 
-    /* ═══════════════════════════════════════════════════════════
-       ★ LOAD PICASSO FOOTER از drawable محلی
-       ═══════════════════════════════════════════════════════════ */
     private void loadPicassoFooter() {
         if (picassoLogo == null) return;
-
-        // ★ لود از drawable — بدون وقفه
         picassoLogo.setImageResource(R.drawable.logo_motion);
     }
 
