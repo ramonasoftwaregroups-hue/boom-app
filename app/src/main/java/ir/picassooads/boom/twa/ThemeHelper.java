@@ -10,62 +10,110 @@ import androidx.appcompat.app.AppCompatDelegate;
  * ═══════════════════════════════════════════════════════════════
  * ThemeHelper — مدیریت تم (روشن/تیره/خودکار)
  * 
- * v2 — اصلاحات:
- *   • اضافه شدن applyModeAndRecreate که تغییر تم را فوری روی Activity اعمال می‌کند
- *   • پشتیبانی از تنظیمات کاربر (اگر theme از سرور آمده باشد)
- *   • toggleLightDark حالا Activity می‌گیرد تا فوراً اعمال شود
+ * v3 — اصلاحات:
+ *   • ترتیب اولویت درست:
+ *       1) تم کاربر از سرور  (user_theme)
+ *       2) تم انتخاب‌شده محلی (theme_mode)
+ *       3) تم سیستم
+ *       4) auto (fallback نهایی)
+ *   • دو کلید جداگانه برای تم سرور و تم محلی
+ *   • سیستم فقط وقتی اعمال می‌شود که هیچ‌کدام تنظیم نشده باشد
  * ═══════════════════════════════════════════════════════════════
  */
 public class ThemeHelper {
 
-    private static final String PREFS = "boom_theme";
-    private static final String KEY_MODE = "theme_mode";
-    private static final String KEY_USER_THEME = "user_theme";
+    private static final String PREFS           = "boom_theme";
+    private static final String KEY_LOCAL_MODE  = "theme_mode";     // انتخاب کاربر از داخل اپ
+    private static final String KEY_USER_THEME  = "user_theme";     // تم ذخیره‌شده در سرور
 
     public static final String MODE_LIGHT = "light";
-    public static final String MODE_DARK = "dark";
-    public static final String MODE_AUTO = "auto";
+    public static final String MODE_DARK  = "dark";
+    public static final String MODE_AUTO  = "auto";
 
     /* ═══════════════════════════════════════════════════════════
-       ذخیره و خواندن
+       ذخیره — دو نوع جداگانه
        ═══════════════════════════════════════════════════════════ */
+
+    /** تم محلی — وقتی کاربر از داخل اپ تغییر می‌دهد */
     public static void saveMode(Context context, String mode) {
-        if (mode == null) mode = MODE_AUTO;
+        if (!isValid(mode)) mode = MODE_AUTO;
         SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-        prefs.edit().putString(KEY_MODE, mode).apply();
+        prefs.edit().putString(KEY_LOCAL_MODE, mode).apply();
     }
 
-    public static String getMode(Context context) {
-        SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-        String mode = prefs.getString(KEY_MODE, MODE_AUTO);
-        if (mode == null) mode = MODE_AUTO;
-        return mode;
-    }
-
-    /* ═══════════════════════════════════════════════════════════
-       ★ ذخیره/خواندن تم کاربر (از سرور آمده)
-       
-       این جدا از تم محلی است — کاربر می‌تواند از پنل وب
-       تم دلخواهش را انتخاب کند و اپ هم از همان تبعیت کند.
-       ═══════════════════════════════════════════════════════════ */
+    /** تم کاربر از سرور — هنگام ورود موفق */
     public static void saveUserTheme(Context context, String theme) {
-        if (theme == null) return;
+        if (!isValid(theme)) return;
         SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
         prefs.edit().putString(KEY_USER_THEME, theme).apply();
+    }
 
-        // ★ تم کاربر را به عنوان تم محلی هم ذخیره می‌کنیم
-        saveMode(context, theme);
+    /* ═══════════════════════════════════════════════════════════
+       خواندن — با ترتیب اولویت درست
+       
+       1) تم کاربر از سرور
+       2) تم انتخاب‌شده محلی
+       3) تم سیستم
+       4) auto
+       ═══════════════════════════════════════════════════════════ */
+    public static String getMode(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+
+        // ۱) تم کاربر از سرور
+        String userTheme = prefs.getString(KEY_USER_THEME, null);
+        if (userTheme != null && isValid(userTheme)) {
+            return userTheme;
+        }
+
+        // ۲) تم انتخاب‌شده محلی
+        String localMode = prefs.getString(KEY_LOCAL_MODE, null);
+        if (localMode != null && isValid(localMode)) {
+            return localMode;
+        }
+
+        // ۳) تم سیستم
+        String systemTheme = getSystemTheme(context);
+        if (systemTheme != null) {
+            return systemTheme;
+        }
+
+        // ۴) fallback نهایی
+        return MODE_AUTO;
     }
 
     public static String getUserTheme(Context context) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-        return prefs.getString(KEY_USER_THEME, MODE_AUTO);
+        String t = prefs.getString(KEY_USER_THEME, null);
+        return isValid(t) ? t : MODE_AUTO;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       تشخیص تم سیستم
+       ═══════════════════════════════════════════════════════════ */
+    private static String getSystemTheme(Context context) {
+        try {
+            int uiMode = context.getResources().getConfiguration().uiMode
+                    & android.content.res.Configuration.UI_MODE_NIGHT_MASK;
+            if (uiMode == android.content.res.Configuration.UI_MODE_NIGHT_YES) {
+                return MODE_DARK;
+            } else if (uiMode == android.content.res.Configuration.UI_MODE_NIGHT_NO) {
+                return MODE_LIGHT;
+            }
+        } catch (Exception ignored) {}
+        return null; // سیستم تنظیم خاصی ندارد → auto
+    }
+
+    public static boolean isValid(String mode) {
+        if (mode == null) return false;
+        return MODE_LIGHT.equals(mode) || MODE_DARK.equals(mode) || MODE_AUTO.equals(mode);
     }
 
     /* ═══════════════════════════════════════════════════════════
        اعمال تم روی کل اپ
        ═══════════════════════════════════════════════════════════ */
     public static void applyMode(Context context, String mode) {
+        if (!isValid(mode)) mode = MODE_AUTO;
+
         int nightMode;
         switch (mode) {
             case MODE_LIGHT:
@@ -87,20 +135,15 @@ public class ThemeHelper {
     }
 
     /* ═══════════════════════════════════════════════════════════
-       ★ applyModeAndRecreate — اعمال فوری روی Activity
-       
-       اگر Activity تغییر کرد، recreate می‌کند.
-       برای دکمه‌ی toggle در Login و بقیه صفحات.
+       applyModeAndRecreate — اعمال فوری روی Activity
        ═══════════════════════════════════════════════════════════ */
     public static void applyModeAndRecreate(Activity activity, String mode) {
         if (activity == null) return;
+        if (!isValid(mode)) mode = MODE_AUTO;
 
-        if (mode == null) mode = MODE_AUTO;
-
-        // ذخیره
+        // ذخیره به عنوان تم محلی
         saveMode(activity, mode);
 
-        // اعمال روی AppCompatDelegate
         int nightMode;
         switch (mode) {
             case MODE_LIGHT:
@@ -115,8 +158,6 @@ public class ThemeHelper {
                 break;
         }
         AppCompatDelegate.setDefaultNightMode(nightMode);
-
-        // ★ اگر AppCompatDelegate خودش recreate نکرد، خودمان می‌کنیم
         activity.recreate();
     }
 
@@ -130,10 +171,7 @@ public class ThemeHelper {
     }
 
     /* ═══════════════════════════════════════════════════════════
-       ★ toggleLightDark — با Activity (اعمال فوری)
-       
-       چرخه: dark → light → dark → ...
-       (auto را در toggle استفاده نمی‌کنیم چون کاربر روی دکمه کلیک می‌کند)
+       toggleLightDark — با Activity (اعمال فوری)
        ═══════════════════════════════════════════════════════════ */
     public static String toggleLightDark(Activity activity) {
         if (activity == null) return MODE_LIGHT;
@@ -141,25 +179,19 @@ public class ThemeHelper {
         boolean isDark = isDark(activity);
         String next = isDark ? MODE_LIGHT : MODE_DARK;
 
+        // ★ چون کاربر خودش تغییر داده، تم سرور را هم override می‌کنیم
+        // تا در بار بعد، تم جدید کاربر اعمال شود
+        saveUserTheme(activity, next);
+
         applyModeAndRecreate(activity, next);
         return next;
     }
 
     /* ═══════════════════════════════════════════════════════════
-       toggle — نسخه‌ی قدیمی (بدون Activity) برای سازگاری
+       پاک کردن (هنگام logout)
        ═══════════════════════════════════════════════════════════ */
-    public static String toggle(Context context) {
-        String current = getMode(context);
-        String next;
-        if (MODE_DARK.equals(current)) {
-            next = MODE_LIGHT;
-        } else if (MODE_LIGHT.equals(current)) {
-            next = MODE_DARK;
-        } else {
-            next = MODE_DARK;
-        }
-        saveMode(context, next);
-        applyMode(context, next);
-        return next;
+    public static void clearUserTheme(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        prefs.edit().remove(KEY_USER_THEME).apply();
     }
 }
