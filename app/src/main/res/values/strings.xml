@@ -37,7 +37,7 @@
     </string>
 
     <!-- ═══════════════════════════════════════════════════════════
-         ★ SPLASH — صفحه‌ی شروع سینمایی
+         SPLASH
          ═══════════════════════════════════════════════════════════ -->
     <string name="splash_title">بوم پیکاسو</string>
     <string name="splash_subtitle">استودیو تولید محتوا</string>
@@ -75,9 +75,7 @@
     <string name="login_verifying">در حال بررسی…</string>
     <string name="login_secure_note">امن‌شده با استانداردهای بوم</string>
 
-    <!-- ═══════════════════════════════════════════════════════════
-         LOGIN — Errors
-         ═══════════════════════════════════════════════════════════ -->
+    <!-- LOGIN — Errors -->
     <string name="login_error_empty_login">نام کاربری یا شماره همراه را وارد کنید</string>
     <string name="login_error_empty_password">رمز عبور را وارد کنید</string>
     <string name="login_error_empty_code">کد ۶ رقمی را وارد کنید</string>
@@ -91,9 +89,7 @@
     <string name="login_error_server">خطای ارتباط با سرور</string>
     <string name="login_error_generic">خطایی رخ داد. لطفاً دوباره تلاش کنید</string>
 
-    <!-- ═══════════════════════════════════════════════════════════
-         LOGIN — Info
-         ═══════════════════════════════════════════════════════════ -->
+    <!-- LOGIN — Info -->
     <string name="login_info_otp_sent">کد تأیید به %1$s ارسال شد</string>
     <string name="login_info_generic_sent">اگر اطلاعات وارد شده صحیح باشد، کد تأیید ارسال خواهد شد</string>
     <string name="login_info_resend_cooldown">ارسال مجدد در %1$d ثانیه</string>
@@ -230,6 +226,20 @@
     <string name="biometric_not_enrolled">ابتدا در تنظیمات گوشی، اثر انگشت یا چهره ثبت کنید</string>
     <string name="biometric_error">خطا در احراز هویت بیومتریک</string>
     <string name="biometric_lockout">بیومتریک موقتاً قفل شده. با رمز عبور وارد شوید</string>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         ★ BIOMETRIC — Login flow (جریان ورود بیومتریک)
+         ═══════════════════════════════════════════════════════════ -->
+    <string name="bio_enter_username_first">ابتدا نام کاربری یا شماره همراه را وارد کنید</string>
+    <string name="bio_not_enabled_for_user">بیومتریک برای این حساب فعال نیست. ابتدا با رمز وارد شوید و فعال‌سازی کنید</string>
+    <string name="bio_auto_login_hint">در حال ورود بیومتریک…</string>
+    <string name="bio_signing_in">در حال ورود…</string>
+    <string name="bio_invalid_key">دستگاه شما دیگر معتبر نیست. لطفاً با رمز وارد شوید</string>
+    <string name="bio_enable_prompt_title">فعال‌سازی ورود بیومتریک</string>
+    <string name="bio_enable_prompt_msg">از این پس می‌توانید با اثر انگشت یا چهره، سریع‌تر وارد شوید. فعال می‌کنید؟</string>
+    <string name="bio_enable_yes">فعال کن</string>
+    <string name="bio_enable_later">بعداً</string>
+    <string name="bio_enabled_toast">ورود بیومتریک فعال شد</string>
 
     <!-- ═══════════════════════════════════════════════════════════
          LOGOUT
