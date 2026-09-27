@@ -192,6 +192,20 @@
     <string name="biometric_lockout">Biometrie vorübergehend gesperrt. Bitte mit Passwort anmelden</string>
 
     <!-- ═══════════════════════════════════════════════════════════
+         ★ BIOMETRIC — Login flow
+         ═══════════════════════════════════════════════════════════ -->
+    <string name="bio_enter_username_first">Geben Sie zuerst Benutzername oder Telefon ein</string>
+    <string name="bio_not_enabled_for_user">Biometrie ist für dieses Konto nicht aktiviert. Melden Sie sich zuerst mit Passwort an</string>
+    <string name="bio_auto_login_hint">Biometrische Anmeldung…</string>
+    <string name="bio_signing_in">Anmeldung…</string>
+    <string name="bio_invalid_key">Dieses Gerät ist nicht mehr gültig. Bitte mit Passwort anmelden</string>
+    <string name="bio_enable_prompt_title">Biometrische Anmeldung aktivieren</string>
+    <string name="bio_enable_prompt_msg">Melden Sie sich schneller mit Fingerabdruck oder Gesicht an. Aktivieren?</string>
+    <string name="bio_enable_yes">Aktivieren</string>
+    <string name="bio_enable_later">Später</string>
+    <string name="bio_enabled_toast">Biometrische Anmeldung aktiviert</string>
+
+    <!-- ═══════════════════════════════════════════════════════════
          LOGOUT
          ═══════════════════════════════════════════════════════════ -->
     <string name="logout_title">Abmelden</string>
