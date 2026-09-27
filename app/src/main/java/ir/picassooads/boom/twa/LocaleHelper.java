@@ -15,37 +15,87 @@ import java.util.Locale;
  * ═══════════════════════════════════════════════════════════════
  * LocaleHelper — مدیریت زبان و اعمال آن به اپ
  * 
- * v2 — اصلاحات:
- *   • اضافه شدن forceLocale() که زبان را فوراً روی Activity اعمال می‌کند
- *   • fallback به فارسی (نه به زبان سیستم)
- *   • تغییر زبان بدون نیاز به recreate پیچیده
+ * v3 — اصلاحات:
+ *   • ترتیب اولویت درست:
+ *       1) زبان کاربر از سرور  (user_language)
+ *       2) زبان انتخاب‌شده محلی (selected_language)
+ *       3) زبان سیستم
+ *       4) fa (fallback نهایی)
+ *   • دو کلید جداگانه برای زبان سرور و زبان محلی
+ *   • سیستم فقط وقتی اعمال می‌شود که هیچ‌کدام تنظیم نشده باشد
  * ═══════════════════════════════════════════════════════════════
  */
 public class LocaleHelper {
 
-    private static final String PREFS = "boom_locale";
-    private static final String KEY_LANG = "selected_language";
+    private static final String PREFS               = "boom_locale";
+    private static final String KEY_LOCAL_LANG      = "selected_language";   // انتخاب کاربر از داخل اپ
+    private static final String KEY_USER_LANG       = "user_language";       // زبان ذخیره‌شده در سرور
 
     public static final String[] SUPPORTED = {"fa", "ar", "en", "fr", "it", "de"};
     public static final String DEFAULT = "fa";
 
     /* ═══════════════════════════════════════════════════════════
-       ذخیره و خواندن زبان
+       ذخیره — دو نوع جداگانه
        ═══════════════════════════════════════════════════════════ */
+
+    /** زبان محلی — وقتی کاربر از داخل اپ تغییر می‌دهد */
     public static void saveLanguage(Context context, String lang) {
         if (!isValid(lang)) return;
         SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-        prefs.edit().putString(KEY_LANG, lang).apply();
+        prefs.edit().putString(KEY_LOCAL_LANG, lang).apply();
     }
 
+    /** زبان کاربر از سرور — هنگام ورود موفق */
+    public static void saveUserLanguage(Context context, String lang) {
+        if (!isValid(lang)) return;
+        SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        prefs.edit().putString(KEY_USER_LANG, lang).apply();
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       خواندن — با ترتیب اولویت درست
+       
+       1) زبان کاربر از سرور
+       2) زبان انتخاب‌شده محلی
+       3) زبان سیستم
+       4) fa
+       ═══════════════════════════════════════════════════════════ */
     public static String getLanguage(Context context) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-        String saved = prefs.getString(KEY_LANG, null);
-        if (saved != null && isValid(saved)) {
-            return saved;
+
+        // ۱) زبان کاربر از سرور
+        String userLang = prefs.getString(KEY_USER_LANG, null);
+        if (userLang != null && isValid(userLang)) {
+            return userLang;
         }
-        // ★ fallback به فارسی (نه به زبان سیستم)
+
+        // ۲) زبان انتخاب‌شده محلی
+        String localLang = prefs.getString(KEY_LOCAL_LANG, null);
+        if (localLang != null && isValid(localLang)) {
+            return localLang;
+        }
+
+        // ۳) زبان سیستم
+        String systemLang = getSystemLanguage();
+        if (systemLang != null) {
+            return systemLang;
+        }
+
+        // ۴) fallback نهایی
         return DEFAULT;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       دریافت زبان سیستم (اگر در لیست پشتیبانی‌شده باشد)
+       ═══════════════════════════════════════════════════════════ */
+    private static String getSystemLanguage() {
+        try {
+            String code = Locale.getDefault().getLanguage();
+            if (code == null) return null;
+            code = code.toLowerCase(Locale.US).trim();
+            if (isValid(code)) return code;
+        } catch (Exception ignored) {}
+        return null;
     }
 
     public static boolean isValid(String lang) {
@@ -61,10 +111,7 @@ public class LocaleHelper {
     }
 
     /* ═══════════════════════════════════════════════════════════
-       ★ forceLocale — اعمال فوری زبان روی Activity
-       
-       این متد زبان را بلافاصله روی منابع Activity اعمال می‌کند
-       و نیازی به attachBaseContext یا recreate ندارد.
+       forceLocale — اعمال فوری زبان روی Activity
        ═══════════════════════════════════════════════════════════ */
     public static void forceLocale(Activity activity, String lang) {
         if (activity == null) return;
@@ -77,7 +124,6 @@ public class LocaleHelper {
         config.setLocale(locale);
         config.setLayoutDirection(locale);
 
-        // ★ روش مستقیم — روی همه‌ی API ها کار می‌کند
         activity.getResources().updateConfiguration(
                 config,
                 activity.getResources().getDisplayMetrics()
@@ -86,7 +132,6 @@ public class LocaleHelper {
 
     /* ═══════════════════════════════════════════════════════════
        applyLocale — برای استفاده در attachBaseContext
-       (روش پیشنهادی برای اپ‌هایی که می‌خواهند در همه Activity ها اعمال شود)
        ═══════════════════════════════════════════════════════════ */
     public static Context applyLocale(Context context, String lang) {
         if (!isValid(lang)) lang = DEFAULT;
@@ -109,6 +154,14 @@ public class LocaleHelper {
 
     public static Context applySavedLocale(Context context) {
         return applyLocale(context, getLanguage(context));
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       پاک کردن (هنگام logout)
+       ═══════════════════════════════════════════════════════════ */
+    public static void clearUserLanguage(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        prefs.edit().remove(KEY_USER_LANG).apply();
     }
 
     /* ═══════════════════════════════════════════════════════════
