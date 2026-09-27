@@ -192,6 +192,20 @@
     <string name="biometric_lockout">Biométrie temporairement verrouillée. Connectez-vous avec votre mot de passe</string>
 
     <!-- ═══════════════════════════════════════════════════════════
+         ★ BIOMETRIC — Login flow
+         ═══════════════════════════════════════════════════════════ -->
+    <string name="bio_enter_username_first">Entrez d\'abord votre nom d\'utilisateur ou téléphone</string>
+    <string name="bio_not_enabled_for_user">La biométrie n\'est pas activée pour ce compte. Connectez-vous avec votre mot de passe</string>
+    <string name="bio_auto_login_hint">Connexion biométrique…</string>
+    <string name="bio_signing_in">Connexion…</string>
+    <string name="bio_invalid_key">Cet appareil n\'est plus valide. Connectez-vous avec votre mot de passe</string>
+    <string name="bio_enable_prompt_title">Activer la connexion biométrique</string>
+    <string name="bio_enable_prompt_msg">Connectez-vous plus rapidement avec empreinte ou visage. Activer ?</string>
+    <string name="bio_enable_yes">Activer</string>
+    <string name="bio_enable_later">Plus tard</string>
+    <string name="bio_enabled_toast">Connexion biométrique activée</string>
+
+    <!-- ═══════════════════════════════════════════════════════════
          LOGOUT
          ═══════════════════════════════════════════════════════════ -->
     <string name="logout_title">Déconnexion</string>
